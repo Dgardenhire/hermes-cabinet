@@ -1,0 +1,16 @@
+# Bot Cabinet v2 for Hermes. name is the registry key; label is the display name.
+# Cabinet adds Bots and crews from botcabinet.com, the Fit Test and Bot Lab. When the gateway answers bots.catalog
+# (Hermes's own Bots catalog, NousResearch/hermes-agent#119260) Cabinet hands those Bots over and never duplicates them. provides_tools / provides_hooks must equal what register() registers.
+manifest_version: 2
+name: bot-cabinet-v2
+label: Cabinet
+version: 0.3.3
+description: Tell Cabinet the job you need done and it answers with the smallest setup that does it, then helps you plan a Bot or a crew.
+author: Damon Gardenhire
+license: MIT
+kind: standalone
+requires_hermes: ">=0.21.5"
+homepage: https://botcabinet.com/
+tags: [bots, crews, profiles]
+provides_tools: []
+provides_hooks: []

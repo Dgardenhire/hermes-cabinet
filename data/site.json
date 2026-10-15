@@ -1,0 +1,2811 @@
+{
+  "source": "botcabinet.com site repository (Damon Gardenhire, MIT)",
+  "siteCommit": "a5d37b8 2026-10-02",
+  "origin": "https://botcabinet.com",
+  "tagline": "Independent guide to useful Bots · Across platforms",
+  "promise": "Find a Bot that makes your day easier",
+  "deck": "Find a useful idea, choose where to run it, and try one real task. Each Bot page tells you what has, and has not, been tested",
+  "ladder": [
+    {
+      "kind": "assignment",
+      "label": "Assignment",
+      "note": "One result"
+    },
+    {
+      "kind": "skill",
+      "label": "Skill",
+      "note": "Reusable method"
+    },
+    {
+      "kind": "routine",
+      "label": "Routine",
+      "note": "Runs on a trigger"
+    },
+    {
+      "kind": "bot",
+      "label": "Bot",
+      "note": "Keeps the job and context"
+    },
+    {
+      "kind": "crew",
+      "label": "Crew",
+      "note": "Specialists with handoffs"
+    }
+  ],
+  "categories": [
+    {
+      "key": "writing",
+      "label": "Writing and communications"
+    },
+    {
+      "key": "research",
+      "label": "Research and monitoring"
+    },
+    {
+      "key": "planning",
+      "label": "Planning and client work"
+    },
+    {
+      "key": "technical",
+      "label": "Software and operations"
+    },
+    {
+      "key": "learning",
+      "label": "Learning"
+    }
+  ],
+  "bots": [
+    {
+      "slug": "scout",
+      "name": "Scout",
+      "title": "Topic and opportunity finder",
+      "category": "research",
+      "categoryLabel": "Research and monitoring",
+      "summary": "Finds timely topics, useful developments, and promising opportunities in the areas you choose",
+      "audience": "People who want a steady list of relevant ideas without searching the web all day",
+      "outcome": "Find timely topics, developments, or opportunities in the subjects I choose and return a short ranked list",
+      "inputs": [
+        "Your topics and audience",
+        "A list of preferred sources",
+        "Optional schedule and delivery channel"
+      ],
+      "outputs": [
+        "A short ranked list",
+        "A link for each source",
+        "A sentence explaining why each item matters"
+      ],
+      "examples": [
+        "Find five developments from the past week that matter to nonprofit leaders.",
+        "Review these sources and suggest three topics for my next newsletter.",
+        "Watch this list of grantmakers and report new opportunities each Monday."
+      ],
+      "firstMission": "Review five approved sources and return three ideas with working links.",
+      "approvals": [
+        "Ask before contacting anyone",
+        "Ask before changing a schedule",
+        "A person selects the topics to pursue.",
+        "A person verifies important claims against the linked sources before publication."
+      ],
+      "offLimits": [
+        "Do not publish"
+      ],
+      "worksWith": [
+        "researcher",
+        "writer",
+        "planner"
+      ],
+      "portrait": "/bot-scout.png",
+      "credits": [],
+      "learnMore": [
+        {
+          "title": "Build a 3-Agent Research Department",
+          "by": "YanXbt",
+          "href": "https://www.hermesbible.com/flows/3-agent-research-department-notebooklm-obsidian"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/scout/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "researcher",
+      "name": "Researcher",
+      "title": "Source-based research assistant",
+      "category": "research",
+      "categoryLabel": "Research and monitoring",
+      "summary": "Answers a defined question with a concise brief, source links, and clearly marked gaps",
+      "audience": "People who need a useful first research pass before they make a decision or draft public material",
+      "outcome": "Answer a defined question with a concise source-based brief and a clear list of remaining questions",
+      "inputs": [
+        "A specific research question",
+        "Date range and source preferences",
+        "The format and length you need"
+      ],
+      "outputs": [
+        "A short research brief",
+        "Source links tied to claims",
+        "Open questions and conflicting information"
+      ],
+      "examples": [
+        "Compare these three options and cite the strongest source for each conclusion.",
+        "Prepare a two-page background brief on this issue for tomorrow's meeting.",
+        "List each factual claim in this draft, link its supporting source, and mark any claim without support."
+      ],
+      "firstMission": "Answer one narrow question using at least three approved sources and identify any unresolved conflict.",
+      "approvals": [
+        "Ask when sources conflict",
+        "A person makes legal, medical, financial, and policy decisions."
+      ],
+      "offLimits": [
+        "Do not make high-stakes decisions",
+        "Do not contact sources or publish"
+      ],
+      "worksWith": [
+        "scout",
+        "writer",
+        "planner",
+        "editor"
+      ],
+      "portrait": "/bot-researcher.png",
+      "credits": [],
+      "learnMore": [
+        {
+          "title": "Build a 3-Agent Research Department",
+          "by": "YanXbt",
+          "href": "https://www.hermesbible.com/flows/3-agent-research-department-notebooklm-obsidian"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/researcher/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "writer",
+      "name": "Writer",
+      "title": "First-draft writing assistant",
+      "category": "writing",
+      "categoryLabel": "Writing and communications",
+      "summary": "Turns an approved brief, notes, or source material into a clear first draft for a named audience",
+      "audience": "People who know what they want to say and need help producing a usable first draft",
+      "outcome": "Turn approved notes, outlines, or research into a clear first draft for a named audience",
+      "inputs": [
+        "Approved notes or brief",
+        "Audience and purpose",
+        "Writing samples or a short style guide"
+      ],
+      "outputs": [
+        "A complete first draft",
+        "A headline or subject-line set",
+        "Questions that require the author's judgment"
+      ],
+      "examples": [
+        "Turn this approved outline into a 700-word newsletter for local business leaders.",
+        "Draft a LinkedIn post from these three source-backed points.",
+        "Write a client update from these meeting notes and action items."
+      ],
+      "firstMission": "Draft a 500-word article from one approved outline and three supplied sources.",
+      "approvals": [
+        "A person approves factual claims and final wording."
+      ],
+      "offLimits": [
+        "Do not invent facts",
+        "Do not publish or send"
+      ],
+      "worksWith": [
+        "scout",
+        "researcher",
+        "editor",
+        "client"
+      ],
+      "portrait": "/bot-writer.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/writer/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.3 on September 20, 2026",
+            "date": "2026-09-20"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "editor",
+      "name": "Editor",
+      "title": "Plain-language editor",
+      "category": "writing",
+      "categoryLabel": "Writing and communications",
+      "summary": "Revises a draft for clarity, structure, accuracy, and the writer's intended voice",
+      "audience": "People who have a draft and want a careful second pass before they publish or send it",
+      "outcome": "Revise a supplied draft for clarity, structure, accuracy, and the writer's intended voice",
+      "inputs": [
+        "The draft",
+        "Audience and desired length",
+        "Source material and protected wording"
+      ],
+      "outputs": [
+        "A revised draft",
+        "A short change summary",
+        "A list of factual or judgment questions"
+      ],
+      "examples": [
+        "Edit this memo for plain English and preserve every factual distinction.",
+        "Cut this article to 900 words and show any claims that need a source.",
+        "Remove repetition and make the requested action clear in the first paragraph."
+      ],
+      "firstMission": "Edit a two-page memo and explain the five most important changes.",
+      "approvals": [
+        "Ask before changing substantive meaning",
+        "A person approves substantive changes."
+      ],
+      "offLimits": [
+        "Do not change quoted language",
+        "Do not publish or send"
+      ],
+      "worksWith": [
+        "writer",
+        "researcher",
+        "client"
+      ],
+      "portrait": "/bot-editor.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/editor/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.3 on September 20, 2026",
+            "date": "2026-09-20"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "planner",
+      "name": "Planner",
+      "title": "Project planning assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Turns a goal into a practical plan with steps, owners, dependencies, dates, and decision points",
+      "audience": "People who need to organize a project before work begins or recover a project that has lost direction",
+      "outcome": "Turn a stated objective into a sequenced plan with owners, dependencies, decisions, and expected results",
+      "inputs": [
+        "The goal and deadline",
+        "Available people and budget",
+        "Known constraints and commitments"
+      ],
+      "outputs": [
+        "A sequenced plan",
+        "Owners and dependencies",
+        "Risks, decisions, and missing information"
+      ],
+      "examples": [
+        "Turn this objective into a four-week plan with owners and dependencies.",
+        "Review these meeting notes and create an action plan.",
+        "Show which decisions must happen before we can launch."
+      ],
+      "firstMission": "Create a two-week plan from one approved objective and identify every missing decision.",
+      "approvals": [
+        "Do not assign people or commit dates without approval",
+        "Do not change an external task system without approval",
+        "A person approves assignments and deadlines."
+      ],
+      "offLimits": [
+        "Never bypass an approval gate, access control, or shutdown instruction."
+      ],
+      "worksWith": [
+        "researcher",
+        "coder",
+        "ops",
+        "client"
+      ],
+      "portrait": "/bot-planner.png",
+      "credits": [],
+      "learnMore": [
+        {
+          "title": "How to Dominate Projects with the Hermes Agent Kanban Board",
+          "by": "Tony Simons",
+          "href": "https://www.hermesbible.com/flows/dominate-projects-with-hermes-kanban"
+        },
+        {
+          "title": "20 Hermes Agent Workflows You'll Want to Steal Immediately",
+          "by": "Tony Simons",
+          "href": "https://www.hermesbible.com/flows/20-hermes-agent-workflows-to-steal"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/planner/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "client",
+      "name": "Client Deliverables",
+      "title": "Client deliverable assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Turns approved work into a formatted client memo, proposal, briefing, or follow-up draft for the named audience, following the supplied brand and document format",
+      "audience": "Consultants, small firms, and internal teams that produce recurring client-facing documents",
+      "outcome": "Turn approved work into a formatted client memo, proposal, briefing, or follow-up draft for the named audience, following the supplied brand and document format",
+      "inputs": [
+        "Approved source material",
+        "Client name and audience",
+        "Brand and formatting guidance"
+      ],
+      "outputs": [
+        "A formatted client draft",
+        "A concise executive summary",
+        "A checklist of items that need approval"
+      ],
+      "examples": [
+        "Turn this research and plan into a three-page client briefing.",
+        "Draft a proposal from these approved scope notes and prices.",
+        "Create a meeting follow-up with decisions, owners, and next steps."
+      ],
+      "firstMission": "Create a two-page client update from supplied notes and mark every item that needs approval.",
+      "approvals": [
+        "Ask before including prices, promises, or deadlines",
+        "A person approves pricing, promises, and final delivery.",
+        "A person limits client information to approved files and systems and checks the Bot’s access before use."
+      ],
+      "offLimits": [
+        "Do not send files or messages"
+      ],
+      "worksWith": [
+        "researcher",
+        "planner",
+        "writer",
+        "editor"
+      ],
+      "portrait": "/atelier/diplomat.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/client/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "coder",
+      "name": "Coder",
+      "title": "Software building assistant",
+      "category": "technical",
+      "categoryLabel": "Software and operations",
+      "summary": "Builds a defined software change, runs the available checks, and reports what changed and what still needs review",
+      "audience": "People who can describe a software outcome and provide a working branch or disposable project copy for the change",
+      "outcome": "Build a defined software change, run the relevant checks, and report the result in plain language",
+      "inputs": [
+        "A defined project and requested outcome",
+        "Acceptance checks",
+        "A working branch or disposable project copy"
+      ],
+      "outputs": [
+        "Changed project files",
+        "Test or build results",
+        "A plain summary of changes, limits, and remaining risks"
+      ],
+      "examples": [
+        "Add this form to the existing site and verify the main path.",
+        "Fix this reproducible bug and explain the cause.",
+        "Build a small prototype from this approved design."
+      ],
+      "firstMission": "Make one small reversible change in a project copy and run the existing checks.",
+      "approvals": [
+        "Ask before deployment",
+        "Ask before deleting material",
+        "A person approves deployment and destructive changes."
+      ],
+      "offLimits": [
+        "Do not change files outside the approved project"
+      ],
+      "worksWith": [
+        "planner",
+        "editor",
+        "ops"
+      ],
+      "portrait": "/bot-coder.png",
+      "credits": [],
+      "learnMore": [
+        {
+          "title": "Four AI agents turn Jira tickets into reviewed PRs",
+          "by": "Luke",
+          "href": "https://www.hermesbible.com/flows/jira-to-pr-four-agents"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/coder/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "ops",
+      "name": "Ops",
+      "title": "Operations monitoring assistant",
+      "category": "technical",
+      "categoryLabel": "Software and operations",
+      "summary": "Checks a defined set of systems or scheduled tasks and reports missed runs, failures, and unusual changes",
+      "audience": "People who manage recurring automated work and need a consistent status report",
+      "outcome": "Check a defined set of systems or scheduled tasks and report missed runs, failures, and unusual changes",
+      "inputs": [
+        "The exact systems and signals to check",
+        "Read-only logs or status sources",
+        "A schedule and delivery destination"
+      ],
+      "outputs": [
+        "A dated status report",
+        "A list of failed or missed checks",
+        "A clear request for any repair that needs approval"
+      ],
+      "examples": [
+        "Check these five scheduled jobs and report any missed run.",
+        "Prepare a weekday status report from these approved logs.",
+        "Compare today's system checks with yesterday's results."
+      ],
+      "firstMission": "Check two harmless status sources and produce a report without changing either system.",
+      "approvals": [
+        "Report before repairing",
+        "Ask before restarts or configuration changes",
+        "Ask before sending external messages",
+        "A person approves restarts, deletions, configuration changes, and external messages."
+      ],
+      "offLimits": [
+        "Never bypass an approval gate, access control, or shutdown instruction."
+      ],
+      "worksWith": [
+        "planner",
+        "coder",
+        "client"
+      ],
+      "portrait": "/bot-ops.png",
+      "credits": [
+        {
+          "creator": "Muse at Work",
+          "work": "Diagnose My Agent's Mistake",
+          "href": "https://museatwork.app/#w=1d0661a5-1cf7-4013-9aff-9cf605bcbe8c",
+          "line": "Its Diagnose an AI result skill adapts Diagnose My Agent's Mistake, listed on Muse at Work"
+        }
+      ],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/ops/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "professor",
+      "name": "Professor",
+      "title": "Learning and study assistant",
+      "category": "learning",
+      "categoryLabel": "Learning",
+      "summary": "Builds a realistic learning plan, explains difficult material, and creates practice questions",
+      "audience": "People learning a subject, preparing for a certification, or organizing professional development",
+      "outcome": "Build a realistic learning plan, explain difficult material, and create practice questions for a defined goal",
+      "inputs": [
+        "The subject and goal",
+        "Current knowledge and available time",
+        "Approved textbooks, courses, or source material"
+      ],
+      "outputs": [
+        "A study plan",
+        "Plain-language explanations",
+        "Practice questions and progress notes"
+      ],
+      "examples": [
+        "Assess what I know about this topic and build a six-week study plan.",
+        "Explain this concept at three levels of difficulty.",
+        "Quiz me on this material and explain each missed answer."
+      ],
+      "firstMission": "Assess one narrow topic and produce a one-week study plan with five practice questions.",
+      "approvals": [
+        "A person selects authoritative materials and evaluates formal credentials."
+      ],
+      "offLimits": [
+        "Do not claim formal certification or professional authority"
+      ],
+      "worksWith": [
+        "researcher",
+        "planner"
+      ],
+      "portrait": "/bot-professor.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/professor/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "architect",
+      "name": "Architect",
+      "title": "CTO and technology strategy assistant",
+      "category": "technical",
+      "categoryLabel": "Software and operations",
+      "summary": "Turns product goals and operating constraints into a practical technology strategy, architecture options, and an ordered risk plan",
+      "audience": "Founders and small teams that need senior technical judgment before building, buying, or rebuilding software",
+      "outcome": "Turn confirmed product goals and operating constraints into a practical technology strategy, architecture options, and an ordered risk plan",
+      "inputs": [
+        "Product goals and business constraints",
+        "Current architecture, code, and vendor notes",
+        "Expected usage, security, reliability, and budget requirements"
+      ],
+      "outputs": [
+        "A technology strategy brief",
+        "Architecture options with costs and tradeoffs",
+        "A prioritized risk and technical-debt plan"
+      ],
+      "examples": [
+        "Review this system and compare two ways to support ten times the current traffic.",
+        "Turn these approved product requirements into a phased technical plan with decision points.",
+        "Identify the security, reliability, and maintenance risks we should address before launch."
+      ],
+      "firstMission": "Review a small architecture packet and produce a one-page decision record comparing two options.",
+      "approvals": [
+        "Ask before selecting a vendor or adding a dependency",
+        "Ask before accepting a security or reliability risk",
+        "A person approves architecture, budgets, vendors, and risk acceptance."
+      ],
+      "offLimits": [
+        "Do not deploy or change production systems",
+        "The Bot uses read-only access until a specific implementation task is approved and does not deploy or change production systems."
+      ],
+      "worksWith": [
+        "founding-engineer",
+        "coder",
+        "planner",
+        "ops"
+      ],
+      "portrait": "/atelier/orrery.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/architect/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "founding-engineer",
+      "name": "Founding Engineer",
+      "title": "Early product and prototyping assistant",
+      "category": "technical",
+      "categoryLabel": "Software and operations",
+      "summary": "Turns a defined user problem into the smallest working product version that can be demonstrated and tested",
+      "audience": "Founders and small teams that have a defined user problem and need a narrow prototype or early product change built",
+      "outcome": "Turn a defined user problem into the smallest working product version that can be demonstrated and tested",
+      "inputs": [
+        "The intended user and defined problem",
+        "Acceptance checks and a time limit",
+        "An approved repository, design, and test instructions"
+      ],
+      "outputs": [
+        "A working prototype or changed project files",
+        "Demo and acceptance-check results",
+        "A decision log with shortcuts, risks, and open questions"
+      ],
+      "examples": [
+        "Build the smallest working version of this approved onboarding flow in a disposable branch.",
+        "Turn these three user stories into a prototype we can test by Friday.",
+        "Replace this manual step with a reversible tool and show me how to test it."
+      ],
+      "firstMission": "Build one small workflow in a disposable project copy, run its acceptance check, and demonstrate the result.",
+      "approvals": [
+        "Ask before adding a dependency or changing a data structure",
+        "Ask before deleting material or using real customer data",
+        "Do not connect outside services or release the work without approval",
+        "A person defines the product promise, accepts technical tradeoffs, and approves release."
+      ],
+      "offLimits": [
+        "Never bypass an approval gate, access control, or shutdown instruction."
+      ],
+      "worksWith": [
+        "architect",
+        "planner",
+        "coder",
+        "researcher"
+      ],
+      "portrait": "/atelier/mechanic.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/founding-engineer/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "chief-of-staff",
+      "name": "Chief of Staff",
+      "title": "Executive priority and coordination assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Keeps a leader's confirmed priorities, decisions, owners, dependencies, and follow-ups in one current operating brief",
+      "audience": "Leaders and small teams that need clearer priorities and coordination without adding another meeting",
+      "outcome": "Keep confirmed priorities, decisions, owners, dependencies, and follow-ups in one current operating brief",
+      "inputs": [
+        "Confirmed leadership priorities",
+        "Active commitments, owners, and project status",
+        "Deadlines, available capacity, and escalation rules"
+      ],
+      "outputs": [
+        "A current priority brief",
+        "A decision, owner, and dependency log",
+        "A meeting agenda and follow-up draft"
+      ],
+      "examples": [
+        "Turn these weekly updates into our five confirmed priorities, blocked decisions, and owner list.",
+        "Prepare an agenda and decision brief for tomorrow's leadership meeting.",
+        "Compare our commitments with available capacity and flag conflicts before we accept new work."
+      ],
+      "firstMission": "Use sample updates from two projects to produce a one-page priority brief and a decision log for review.",
+      "approvals": [
+        "Ask before contacting anyone",
+        "Ask before changing a calendar, task, or shared record",
+        "A leader sets priorities, assigns people, and approves commitments and deadlines.",
+        "The Bot drafts agendas and follow-ups but does not contact people or change shared records without approval."
+      ],
+      "offLimits": [
+        "Do not assign people or commit dates or budgets"
+      ],
+      "worksWith": [
+        "planner",
+        "researcher",
+        "client",
+        "pulse",
+        "story"
+      ],
+      "portrait": "/atelier/fleet.jpg",
+      "credits": [],
+      "learnMore": [
+        {
+          "title": "How to Dominate Projects with the Hermes Agent Kanban Board",
+          "by": "Tony Simons",
+          "href": "https://www.hermesbible.com/flows/dominate-projects-with-hermes-kanban"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/chief-of-staff/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "coach",
+      "name": "Coach",
+      "title": "Life and career planning assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Helps a person clarify a life or career decision, compare paths, and choose a realistic next horizon",
+      "audience": "People considering a transition or trying to turn a broad direction into practical next steps",
+      "outcome": "Clarify a life or career decision, compare realistic paths, and choose a manageable next horizon",
+      "inputs": [
+        "The current situation and desired direction",
+        "Values, obligations, and time, energy, or financial constraints",
+        "Confirmed commitments and decisions that remain open"
+      ],
+      "outputs": [
+        "A clear decision frame",
+        "A next-horizon plan sized to available time and energy",
+        "Questions, assumptions, and options for reflection"
+      ],
+      "examples": [
+        "Compare these two career paths using my income needs, values, skills, and uncertainty.",
+        "Turn this twelve-month direction into a realistic plan for the next four weeks.",
+        "Guide a weekly review that separates ideas, commitments, unfinished work, and what I can stop doing."
+      ],
+      "firstMission": "Use one current, low-stakes decision to compare two options and define one reversible next step.",
+      "approvals": [
+        "The user chooses every goal and action",
+        "A person makes all life, career, employment, medical, legal, and financial decisions.",
+        "The Bot is not a therapist, doctor, lawyer, or financial adviser and does not contact anyone or change a schedule without approval."
+      ],
+      "offLimits": [
+        "Do not contact anyone or change a schedule"
+      ],
+      "worksWith": [
+        "planner",
+        "professor"
+      ],
+      "portrait": "/atelier/navigator.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/coach/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "nova",
+      "name": "Nova",
+      "title": "New venture testing assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Turns a new venture idea into explicit assumptions, evidence questions, and a small test with decision rules",
+      "audience": "Founders and teams deciding whether a new product, service, or business line deserves further investment",
+      "outcome": "Turn a new venture idea into explicit assumptions, evidence questions, and a small test with decision rules",
+      "inputs": [
+        "The idea and its current status",
+        "The intended customer and problem",
+        "Existing evidence, budget, time, and risk limits"
+      ],
+      "outputs": [
+        "A concise venture brief",
+        "An evidence and assumption ledger",
+        "A low-cost test plan with success, revise, and stop criteria"
+      ],
+      "examples": [
+        "Turn this idea into a one-week demand test within the budget I supplied.",
+        "Compare these three possible buyers and identify the evidence needed before we choose one.",
+        "Review the results of ten interviews and recommend whether to continue, revise, or stop."
+      ],
+      "firstMission": "Use one venture concept and approved public sources to create an assumption ledger and one no-spend test plan.",
+      "approvals": [
+        "Ask before spending money or contacting anyone",
+        "Ask before publishing a claim or beginning a build",
+        "A person approves spending, outreach, public claims, partnerships, and any decision to start or expand a venture."
+      ],
+      "offLimits": [
+        "Do not present forecasts or interest as proof of demand",
+        "The Bot treats forecasts as hypotheses and never presents interest, traffic, or generated analysis as proof of demand."
+      ],
+      "worksWith": [
+        "scout",
+        "researcher",
+        "planner",
+        "founding-engineer",
+        "pulse"
+      ],
+      "portrait": "/atelier/nautilus.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/nova/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "pulse",
+      "name": "Pulse",
+      "title": "Growth management assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Turns a growth goal and approved data into a clear baseline, prioritized experiments, and a recurring results brief",
+      "audience": "Small teams that need a disciplined view of acquisition, activation, retention, or revenue without chasing every metric",
+      "outcome": "Turn a growth goal and approved data into a clear baseline, prioritized experiments, and a recurring results brief",
+      "inputs": [
+        "The growth goal and customer stage",
+        "Approved data and metric definitions",
+        "Channels, budget, capacity, and privacy or brand constraints"
+      ],
+      "outputs": [
+        "A baseline metric and funnel brief",
+        "A prioritized experiment list with one primary metric for each test",
+        "A weekly report separating observations, hypotheses, and decisions"
+      ],
+      "examples": [
+        "Map this signup funnel and show where the largest verified drop-off occurs.",
+        "Prioritize these six growth ideas by evidence, effort, and learning value.",
+        "Prepare a weekly growth brief from this dashboard export and explain any anomaly."
+      ],
+      "firstMission": "Use one approved data export to define the baseline, identify one gap, and propose two measurable experiments.",
+      "approvals": [
+        "Ask before changing campaigns, tracking, or accounts",
+        "Ask before spending money or contacting customers",
+        "A person approves targeting, spending, public claims, customer outreach, and account changes."
+      ],
+      "offLimits": [
+        "Do not collect new personal data or publish claims",
+        "The Bot does not change campaigns or tracking, collect new personal data, or treat a small sample as a reliable result."
+      ],
+      "worksWith": [
+        "nova",
+        "researcher",
+        "scout",
+        "writer",
+        "story"
+      ],
+      "portrait": "/atelier/cicada.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/pulse/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "story",
+      "name": "Story",
+      "title": "Chief narrative officer",
+      "category": "writing",
+      "categoryLabel": "Writing and communications",
+      "summary": "Finds and maintains the central narrative across a founder, organization, product, or campaign using confirmed facts and approved source material",
+      "audience": "Leaders and teams whose public materials need one clear story without flattening factual distinctions or inventing proof",
+      "outcome": "Build and maintain a clear central narrative from confirmed facts and approved source material",
+      "inputs": [
+        "Confirmed facts and approved source material",
+        "The audience and desired response",
+        "Voice samples, protected language, and off-limit claims"
+      ],
+      "outputs": [
+        "A narrative brief with a central idea and supporting evidence",
+        "A message map by audience and channel",
+        "A list of contradictions, unsupported claims, and decisions"
+      ],
+      "examples": [
+        "Turn these interviews and source documents into an origin story without adding events or motives.",
+        "Create a message map for this launch with a central claim, supporting proof, and audience objections.",
+        "Review these site pages and presentations, identify contradictions, and propose one consistent narrative."
+      ],
+      "firstMission": "Use three approved source documents to create a one-page narrative brief and mark every unsupported claim.",
+      "approvals": [
+        "Ask before changing protected language or substantive meaning",
+        "A person decides what the organization stands for and approves every public claim and final draft."
+      ],
+      "offLimits": [
+        "Do not invent facts, quotations, results, or motives",
+        "Do not publish or send",
+        "The Bot does not invent quotations, events, results, or motives and does not publish or send material."
+      ],
+      "worksWith": [
+        "researcher",
+        "writer",
+        "editor",
+        "pulse",
+        "chief-of-staff"
+      ],
+      "portrait": "/atelier/archivist.jpg",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/story/",
+      "test": {
+        "status": "not-tested",
+        "kind": "import-only",
+        "line": "Hermes archive import checked; a full task run is still pending",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.0 on September 4, 2026",
+            "date": "2026-09-04"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "A real task",
+            "detail": "Human technical and role-specific output tests remain pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "daily-newspaper",
+      "name": "Daily Newspaper",
+      "title": "Personal daily briefing maker",
+      "category": "writing",
+      "categoryLabel": "Writing and communications",
+      "summary": "Turns the calendar notes, messages, and source material you choose into a short personal newspaper for the day ahead",
+      "audience": "People who want a calm, useful morning briefing without opening several apps or handing an agent unlimited access",
+      "outcome": "Turn the information I choose into a short, source-linked personal newspaper for the day ahead",
+      "inputs": [
+        "The calendar entries, messages, notes, or articles to use",
+        "Your preferred sections, length, and reading time",
+        "The cutoff time and any topics or private details to leave out"
+      ],
+      "outputs": [
+        "A short personal newspaper with clear sections",
+        "A source note for every factual item",
+        "A separate list of missing information and corrections"
+      ],
+      "examples": [
+        "Make a one-page newspaper from these calendar entries, messages, and saved articles.",
+        "Create tomorrow's edition from only the sources in this folder and flag anything that needs my answer.",
+        "Revise this sample edition so every factual item names its source and uncertain details stay out of the paper."
+      ],
+      "firstMission": "Use a fictional calendar entry, two short messages, and one saved article to make a one-page sample. Cite each item, keep one deliberately missing meeting link in the review note, and do not connect accounts, schedule, save, send, publish, or print anything.",
+      "approvals": [
+        "Ask before connecting an account or widening access",
+        "Ask before creating or changing a schedule",
+        "Ask before saving outside the approved folder, sending, publishing, or printing",
+        "Ask before connecting an account, creating a schedule, sending, publishing, saving outside the approved folder, or printing."
+      ],
+      "offLimits": [
+        "Use only material the user supplies or explicitly connects. Do not search private accounts or widen access on your own.",
+        "Do not invent missing context, urgency, quotations, links, or conclusions",
+        "Do not place uncertain or conflicting details in the newspaper",
+        "Do not expose private source material beyond the approved edition"
+      ],
+      "worksWith": [],
+      "portrait": "/downloads/bot-portraits/hermes/daily-newspaper-1024.png",
+      "credits": [
+        {
+          "creator": "Karen X. Cheng",
+          "work": "The Morning Newspaper",
+          "href": "https://x.ai/bot/marketplace/bots/the-morning-newspaper",
+          "line": "Inspired by Karen X. Cheng's The Morning Newspaper"
+        }
+      ],
+      "learnMore": [
+        {
+          "title": "Build a 3-Agent Research Department",
+          "by": "YanXbt",
+          "href": "https://www.hermesbible.com/flows/3-agent-research-department-notebooklm-obsidian"
+        }
+      ],
+      "href": "https://botcabinet.com/bots/daily-newspaper/",
+      "test": {
+        "status": "tested",
+        "kind": "one-run",
+        "line": "One recorded task run is available",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.4 on September 23, 2026",
+            "date": "2026-09-23"
+          },
+          {
+            "what": "One task run",
+            "detail": "One bounded first-mission run passed using supplied fictional material: it produced a cited one-page edition, kept a missing meeting link in a review note, flagged an inconsistent weekday, and made no outside changes",
+            "date": "2026-09-23",
+            "href": "https://botcabinet.com/proof-room/daily-newspaper/runtime-summary.md"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "Repeated runs",
+            "detail": "This is one run, not evidence of general reliability or approval for scheduling"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "curator",
+      "name": "Curator",
+      "title": "Bot lineup improvement manager",
+      "category": "technical",
+      "categoryLabel": "Software and operations",
+      "summary": "Reviews your Bot lineup, proposes improvements and combinations, and checks whether approved changes actually helped",
+      "audience": "Anyone managing several Bots whose jobs overlap, drift, or stop being useful",
+      "outcome": "Reviews your Bot lineup, proposes improvements and combinations, and checks whether approved changes actually helped",
+      "inputs": [
+        "Bot names, purposes, instructions, and boundaries",
+        "Recent outputs and failures, with dates and any available usage or cost records",
+        "Your goals, protected behaviors, and permission to inspect the supplied material"
+      ],
+      "outputs": [
+        "A Lineup Review with evidence for each recommendation",
+        "Proposed instruction changes and a small comparison test",
+        "A revision record with results, unresolved gaps, and a next review date"
+      ],
+      "examples": [
+        "Review these four Bot profiles and their recent outputs. Recommend what to keep, improve, combine, retire, or add.",
+        "Draft a revised instruction set for this Bot and a test that would show whether it improved.",
+        "Compare the before-and-after results of our last revision. Should we keep it or reverse it?"
+      ],
+      "firstMission": "Supply three fictional profiles: two newsletter researchers using the same sources and one rarely used invoice helper. Include two dated research outputs and no invoice logs. Ask for a Lineup Review. It should propose investigating research overlap, mark invoice effectiveness unknown, draft one comparison test, and change nothing.",
+      "approvals": [
+        "Ask before taking an outside action, changing access, or expanding the job."
+      ],
+      "offLimits": [
+        "Low usage alone is not grounds for retirement. Do not treat unavailable records as proof that a Bot failed.",
+        "Never claim a revision improved performance without comparing actual results."
+      ],
+      "worksWith": [
+        "chief-of-staff",
+        "researcher",
+        "editor"
+      ],
+      "portrait": "/downloads/bot-portraits/hermes/curator-1024.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/curator/",
+      "test": {
+        "status": "tested",
+        "kind": "reproduced",
+        "line": "Two recorded task runs passed",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.1 on September 9, 2026",
+            "date": "2026-09-09"
+          },
+          {
+            "what": "Two task runs",
+            "detail": "Two published first-mission role runs passed their disclosed checks",
+            "date": "2026-09-09",
+            "href": "https://botcabinet.com/proof/curator-lineup-review/"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "Human technical review",
+            "detail": "Human technical review remains pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "reentry",
+      "name": "Reentry",
+      "title": "Project resumption guide",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Reconstructs where a project stands so you can return to the right files, confirmed decisions, and next useful action",
+      "audience": "People returning to projects after interruptions or switching between several ongoing builds",
+      "outcome": "Reconstructs where a project stands so you can return to the right files, confirmed decisions, and next useful action",
+      "inputs": [
+        "The project folder or selected documents and conversation exports",
+        "The last known checkpoint and your current goal",
+        "Any confirmed approvals, delivery records, and version history"
+      ],
+      "outputs": [
+        "A concise project resumption brief with source links",
+        "Confirmed decisions, open questions, and current files",
+        "One recommended next action and an updated handoff record"
+      ],
+      "examples": [
+        "I last worked on this two weeks ago. Reconstruct where I left off from these notes and files.",
+        "Which of these three drafts is the approved version, and what remains unresolved?",
+        "Prepare a handoff that another person or Bot can use without rereading the whole conversation."
+      ],
+      "firstMission": "Supply an approved draft dated Monday, a newer unapproved draft dated Tuesday, and a note proposing publication without a receipt. Ask where to resume. It should identify Monday as the last approved draft, Tuesday as proposed changes, publication as unconfirmed, and recommend reviewing the changes.",
+      "approvals": [
+        "Ask before taking an outside action, changing access, or expanding the job."
+      ],
+      "offLimits": [
+        "Do not call the newest file the approved version without evidence. Surface conflicting records.",
+        "Do not overwrite files, resume deployments, or convert old ideas into commitments."
+      ],
+      "worksWith": [
+        "planner",
+        "chief-of-staff",
+        "writer"
+      ],
+      "portrait": "/downloads/bot-portraits/hermes/reentry-1024.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/reentry/",
+      "test": {
+        "status": "tested",
+        "kind": "reproduced",
+        "line": "Two recorded task runs passed",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.1 on September 9, 2026",
+            "date": "2026-09-09"
+          },
+          {
+            "what": "Two task runs",
+            "detail": "Two published first-mission role runs passed their disclosed checks",
+            "date": "2026-09-09",
+            "href": "https://botcabinet.com/proof/reentry-project-resumption/"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "Human technical review",
+            "detail": "Human technical review remains pending"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "receipt",
+      "name": "Receipt",
+      "title": "Returns and warranty case assistant",
+      "category": "planning",
+      "categoryLabel": "Planning and client work",
+      "summary": "Keeps receipts, correspondence, deadlines, and next steps together while you resolve a refund, return, or warranty issue",
+      "audience": "People tired of reconstructing a consumer issue every time they contact a company",
+      "outcome": "Keeps receipts, correspondence, deadlines, and next steps together while you resolve a refund, return, or warranty issue",
+      "inputs": [
+        "Receipts, order confirmation, and the applicable policy",
+        "Correspondence, case numbers, and promised dates",
+        "The outcome you want and any prior action taken"
+      ],
+      "outputs": [
+        "A case timeline with receipts and source references",
+        "A list of documented deadlines, promised actions, and missing information",
+        "A ready-to-review follow-up message and a record of the outcome"
+      ],
+      "examples": [
+        "Organize these receipts and emails into a timeline for my missing refund.",
+        "Compare the seller's return policy with my purchase record and tell me what information is missing.",
+        "Draft a follow-up using the case number and commitments from our last conversation."
+      ],
+      "firstMission": "Supply a fictional receipt for $80, an email promising a refund within ten business days, and no payment confirmation. Ask for a status summary and follow-up. It should distinguish promised from received, request the promise date if missing, draft a factual message, and leave the case open.",
+      "approvals": [
+        "ask before sending, filing a claim, canceling, or sharing personal information."
+      ],
+      "offLimits": [
+        "Do not invent eligibility, policies, deadlines, purchases, or company promises."
+      ],
+      "worksWith": [
+        "researcher",
+        "writer"
+      ],
+      "portrait": "/downloads/bot-portraits/hermes/receipt-1024.png",
+      "credits": [],
+      "learnMore": [],
+      "href": "https://botcabinet.com/bots/receipt/",
+      "test": {
+        "status": "tested",
+        "kind": "reproduced",
+        "line": "Two recorded task runs passed",
+        "tested": [
+          {
+            "what": "Hermes import check",
+            "detail": "The archive passed an isolated import and bundled-Skill presence check in Hermes Agent 0.21.1 on September 9, 2026",
+            "date": "2026-09-09"
+          },
+          {
+            "what": "Two task runs",
+            "detail": "Two published first-mission role runs passed their disclosed checks",
+            "date": "2026-09-09",
+            "href": "https://botcabinet.com/proof/receipt-refund-case/"
+          }
+        ],
+        "notTested": [
+          {
+            "what": "Human technical review",
+            "detail": "Human technical review remains pending"
+          }
+        ]
+      }
+    }
+  ],
+  "crews": [
+    {
+      "slug": "customer-support-desk",
+      "name": "Customer Support Desk",
+      "summary": "Sort routine customer requests, find the right policy, and prepare clear responses while escalating exceptions",
+      "members": [
+        {
+          "slug": "chief-of-staff",
+          "name": "Chief of Staff",
+          "responsibility": "Act as Intake, classify the request, and route it to the right path"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Find the approved policy or customer record needed for the case"
+        },
+        {
+          "slug": "writer",
+          "name": "Writer",
+          "responsibility": "Draft a concise response using confirmed information"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Act as Support Reviewer and check tone, accuracy, and escalation"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Intake",
+          "action": "Classify urgency, topic, customer, and required records",
+          "owner": "Chief of Staff",
+          "who": [
+            {
+              "bot": "chief-of-staff",
+              "label": "Chief of Staff"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Policy check",
+          "action": "Find the approved answer and mark missing information",
+          "owner": "Researcher",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Draft",
+          "action": "Prepare the reply or escalation record",
+          "owner": "Writer",
+          "who": [
+            {
+              "bot": "writer",
+              "label": "Writer"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Review",
+          "action": "Approve, revise, or route the response",
+          "owner": "Editor + person",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Send a customer reply",
+        "Issue a refund, credit, replacement, or account change",
+        "Handle a legal, safety, or privacy issue"
+      ],
+      "offLimits": [
+        "Expose another customer’s information",
+        "Delete requests or records",
+        "Promise an outcome before approval"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/customer-support-desk/"
+    },
+    {
+      "slug": "event-operations-desk",
+      "name": "Event Operations Desk",
+      "summary": "Turn an approved event brief into a schedule, run of show, responsibility map, and exception list",
+      "members": [
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build the event plan, milestones, dependencies, and run of show"
+        },
+        {
+          "slug": "chief-of-staff",
+          "name": "Chief of Staff",
+          "responsibility": "Act as Coordinator and maintain owners, decisions, and deadlines"
+        },
+        {
+          "slug": "client",
+          "name": "Client Deliverables",
+          "responsibility": "Prepare guest, speaker, vendor, and internal communication drafts"
+        },
+        {
+          "slug": "ops",
+          "name": "Ops",
+          "responsibility": "Track readiness, logistics, unresolved risks, and day-of notes"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Planning",
+          "action": "Build milestones, dependencies, and decision dates",
+          "owner": "Planner",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Coordination",
+          "action": "Maintain the tracker and communication drafts",
+          "owner": "Chief of Staff + Client Deliverables",
+          "who": [
+            {
+              "bot": "chief-of-staff",
+              "label": "Chief of Staff"
+            },
+            {
+              "bot": "client",
+              "label": "Client Deliverables"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Readiness",
+          "action": "Review logistics, risks, and fallback plans",
+          "owner": "Ops + person",
+          "who": [
+            {
+              "bot": "ops",
+              "label": "Ops"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Closeout",
+          "action": "Record exceptions and follow-up",
+          "owner": "Ops + person",
+          "who": [
+            {
+              "bot": "ops",
+              "label": "Ops"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Contact a guest, speaker, vendor, or venue",
+        "Make a purchase, booking, or cancellation",
+        "Change the event date, program, or public announcement"
+      ],
+      "offLimits": [
+        "Sign contracts or accept terms",
+        "Spend money or make reservations",
+        "Expose guest information"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/event-operations-desk/"
+    },
+    {
+      "slug": "grant-pursuit-desk",
+      "name": "Grant Pursuit Desk",
+      "summary": "Find promising funding opportunities, check eligibility, and turn the strongest option into a proposal work plan",
+      "members": [
+        {
+          "slug": "scout",
+          "name": "Scout",
+          "responsibility": "Find current opportunities matching the approved mission, geography, and funding range"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Verify eligibility, deadlines, requirements, and official language"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build the work plan, evidence checklist, assignments, and schedule"
+        },
+        {
+          "slug": "writer",
+          "name": "Writer",
+          "responsibility": "Draft sections from approved facts and evidence"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Check completeness, consistency, claims, and compliance questions"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Discovery",
+          "action": "Find opportunities and preserve official source links",
+          "owner": "Scout",
+          "who": [
+            {
+              "bot": "scout",
+              "label": "Scout"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Eligibility",
+          "action": "Check threshold requirements and prepare a decision brief",
+          "owner": "Researcher + person",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Development",
+          "action": "Build the evidence plan and draft approved sections",
+          "owner": "Planner + Writer",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            },
+            {
+              "bot": "writer",
+              "label": "Writer"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Compliance",
+          "action": "Review the package and route open questions",
+          "owner": "Editor + person",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Represent organizational eligibility or performance",
+        "Set a budget, target, or commitment",
+        "Contact a funder or submit an application"
+      ],
+      "offLimits": [
+        "Invent performance data, partners, or budgets",
+        "Reuse restricted material",
+        "Submit through a portal"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/grant-pursuit-desk/"
+    },
+    {
+      "slug": "hiring-support-desk",
+      "name": "Hiring Support Desk",
+      "summary": "Prepare a role brief, interview materials, candidate research, and structured notes for a human hiring process",
+      "members": [
+        {
+          "slug": "writer",
+          "name": "Writer",
+          "responsibility": "Create the approved role brief and candidate-facing drafts"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Organize supplied job-relevant information without scoring people"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build the interview plan, question set, and schedule"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Check clarity, consistency, and missing criteria"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Role definition",
+          "action": "Approve responsibilities, evidence, and process",
+          "owner": "Writer + Planner + person",
+          "who": [
+            {
+              "bot": "writer",
+              "label": "Writer"
+            },
+            {
+              "bot": "planner",
+              "label": "Planner"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Preparation",
+          "action": "Organize material and prepare consistent questions",
+          "owner": "Researcher + Planner",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            },
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Interview record",
+          "action": "Format factual notes and open questions",
+          "owner": "Editor",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Decision",
+          "action": "People make every employment decision",
+          "owner": "Hiring manager",
+          "who": [
+            {
+              "you": true,
+              "label": "Hiring manager"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Contact, advance, rank, reject, or select a candidate",
+        "Discuss compensation or background checks",
+        "Use sensitive personal information"
+      ],
+      "offLimits": [
+        "Make an employment decision",
+        "Infer protected traits",
+        "Search private or unapproved sources"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/hiring-support-desk/"
+    },
+    {
+      "slug": "learning-certification-crew",
+      "name": "Learning and Certification Crew",
+      "summary": "Turn official material into a realistic study plan, clear explanations, practice questions, and progress reviews",
+      "members": [
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Collect and organize approved official materials"
+        },
+        {
+          "slug": "professor",
+          "name": "Professor",
+          "responsibility": "Explain concepts and create practice questions"
+        },
+        {
+          "slug": "coach",
+          "name": "Coach",
+          "responsibility": "Act as Quiz Coach and help the learner review errors"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build and adjust the study schedule"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Plan",
+          "action": "Map official material to a realistic sequence",
+          "owner": "Researcher + Planner",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            },
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Learn",
+          "action": "Explain the current topic and examples",
+          "owner": "Professor",
+          "who": [
+            {
+              "bot": "professor",
+              "label": "Professor"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Practice",
+          "action": "Run a quiz and record errors",
+          "owner": "Coach",
+          "who": [
+            {
+              "bot": "coach",
+              "label": "Coach"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Review",
+          "action": "Adjust the next cycle from progress",
+          "owner": "Planner + learner",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            },
+            {
+              "you": true,
+              "label": "Learner"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Register or purchase material",
+        "Change the target or schedule",
+        "Add outside material as an authority"
+      ],
+      "offLimits": [
+        "Claim unofficial material is authoritative",
+        "Complete graded work dishonestly",
+        "Guarantee an exam result"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/learning-certification-crew/"
+    },
+    {
+      "slug": "personal-planning-desk",
+      "name": "Personal Planning Desk",
+      "summary": "Turn a trip, set of errands, or personal project into a researched plan with constraints, choices, and approval points",
+      "members": [
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Research approved options, current facts, costs, and constraints"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build the sequence, schedule, decisions, and fallback plan"
+        },
+        {
+          "slug": "coach",
+          "name": "Coach",
+          "responsibility": "Act as Constraint Checker and test fit with stated priorities"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Define",
+          "action": "Confirm the goal, constraints, and research questions",
+          "owner": "Planner + person",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Research",
+          "action": "Collect options, costs, and tradeoffs",
+          "owner": "Researcher",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Check",
+          "action": "Test fit and fallback needs",
+          "owner": "Coach",
+          "who": [
+            {
+              "bot": "coach",
+              "label": "Coach"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Decide",
+          "action": "Approve choices and carry out actions personally",
+          "owner": "Person",
+          "who": [
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Make a purchase, booking, cancellation, or return",
+        "Send a message or change a calendar",
+        "Access medical, legal, or financial information"
+      ],
+      "offLimits": [
+        "Spend money or accept terms",
+        "Make medical, legal, or financial decisions",
+        "Expose personal information"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        },
+        {
+          "title": "Build a 3-Agent Research Department",
+          "by": "YanXbt",
+          "href": "https://www.hermesbible.com/flows/3-agent-research-department-notebooklm-obsidian"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/personal-planning-desk/"
+    },
+    {
+      "slug": "product-delivery-crew",
+      "name": "Product Delivery Crew",
+      "summary": "Move an approved feature from a clear requirement through technical direction, implementation, checks, and review",
+      "members": [
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Define the user outcome, acceptance conditions, scope, and dependencies"
+        },
+        {
+          "slug": "architect",
+          "name": "Architect",
+          "responsibility": "Choose the technical approach and identify material risks"
+        },
+        {
+          "slug": "founding-engineer",
+          "name": "Founding Engineer",
+          "responsibility": "Implement the approved approach and document actual changes"
+        },
+        {
+          "slug": "coder",
+          "name": "Coder",
+          "responsibility": "Act as Tester by running checks and reporting failures"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Prepare review notes, release copy, and unresolved questions"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Definition",
+          "action": "Agree on the outcome and boundaries",
+          "owner": "Planner + person",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Direction",
+          "action": "Choose the approach and record risks",
+          "owner": "Architect",
+          "who": [
+            {
+              "bot": "architect",
+              "label": "Architect"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Build and check",
+          "action": "Implement the change and run checks",
+          "owner": "Founding Engineer + Coder",
+          "who": [
+            {
+              "bot": "founding-engineer",
+              "label": "Founding Engineer"
+            },
+            {
+              "bot": "coder",
+              "label": "Coder"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Release decision",
+          "action": "Review evidence before release",
+          "owner": "Editor + person",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Change authentication, billing, or production data",
+        "Install an unfamiliar dependency",
+        "Merge, deploy, or publish a release"
+      ],
+      "offLimits": [
+        "Expose secrets",
+        "Force-push or overwrite another project",
+        "Disable security checks to make a build pass"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        },
+        {
+          "title": "Four AI agents turn Jira tickets into reviewed PRs",
+          "by": "Luke",
+          "href": "https://www.hermesbible.com/flows/jira-to-pr-four-agents"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/product-delivery-crew/"
+    },
+    {
+      "slug": "publishing-desk",
+      "name": "Publishing Desk",
+      "summary": "A standing editorial team that turns approved ideas and sources into finished material for review",
+      "members": [
+        {
+          "slug": "scout",
+          "name": "Scout",
+          "responsibility": "Find timely subjects and source material inside the approved brief"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Check claims, organize evidence, and mark gaps or conflicting sources"
+        },
+        {
+          "slug": "story",
+          "name": "Story",
+          "responsibility": "Shape the central message for the intended audience"
+        },
+        {
+          "slug": "writer",
+          "name": "Writer",
+          "responsibility": "Create the main draft and approved channel versions"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Improve clarity, check claims, and return approval questions"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Start of cycle",
+          "action": "Select the topic and approve sources",
+          "owner": "Person + Scout",
+          "who": [
+            {
+              "you": true,
+              "label": "Person"
+            },
+            {
+              "bot": "scout",
+              "label": "Scout"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Research",
+          "action": "Build the evidence brief and mark gaps",
+          "owner": "Researcher",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Draft",
+          "action": "Create the main piece and channel versions",
+          "owner": "Story + Writer",
+          "who": [
+            {
+              "bot": "story",
+              "label": "Story"
+            },
+            {
+              "bot": "writer",
+              "label": "Writer"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Review",
+          "action": "Check the package and decide whether to publish",
+          "owner": "Editor + person",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Send or publish material",
+        "Contact a source or contributor",
+        "Change a public claim, price, or promise"
+      ],
+      "offLimits": [
+        "Use unapproved private material",
+        "Publish from a draft conversation",
+        "Represent assumptions as confirmed facts"
+      ],
+      "testStatus": "failed-acceptance",
+      "testLabel": "Failed acceptance",
+      "testDate": "2026-09-20",
+      "testHref": "https://botcabinet.com/proof/publishing-desk-failed-handoff",
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/publishing-desk/"
+    },
+    {
+      "slug": "sales-meeting-desk",
+      "name": "Sales Meeting Desk",
+      "summary": "Prepare for important sales conversations and produce useful follow-up without losing commitments or context",
+      "members": [
+        {
+          "slug": "scout",
+          "name": "Scout",
+          "responsibility": "Act as Account Scout and gather current public information about the prospect"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Verify account facts and separate evidence from assumptions"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Build the meeting objective, question sequence, and decision points"
+        },
+        {
+          "slug": "client",
+          "name": "Client Deliverables",
+          "responsibility": "Turn approved notes into a recap and follow-up draft"
+        },
+        {
+          "slug": "editor",
+          "name": "Editor",
+          "responsibility": "Check accuracy and flag unsupported promises"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Before the meeting",
+          "action": "Research the account and approve the objective",
+          "owner": "Scout + Researcher + person",
+          "who": [
+            {
+              "bot": "scout",
+              "label": "Scout"
+            },
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Meeting plan",
+          "action": "Prepare questions, priorities, and boundaries",
+          "owner": "Planner",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "After the meeting",
+          "action": "Extract decisions, commitments, and open questions",
+          "owner": "Client Deliverables",
+          "who": [
+            {
+              "bot": "client",
+              "label": "Client Deliverables"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Follow-up",
+          "action": "Review and send the approved recap or proposal",
+          "owner": "Editor + person",
+          "who": [
+            {
+              "bot": "editor",
+              "label": "Editor"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Contact a prospect or customer",
+        "Change pricing, scope, terms, or opportunity stage",
+        "Promise a delivery date or result"
+      ],
+      "offLimits": [
+        "Send messages without review",
+        "Invent account facts",
+        "Access unrelated customer records"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/sales-meeting-desk/"
+    },
+    {
+      "slug": "small-business-admin-desk",
+      "name": "Small-Business Admin Desk",
+      "summary": "Keep routine inbox work, customer drafts, weekly status, and follow-up organized without uncontrolled authority",
+      "members": [
+        {
+          "slug": "chief-of-staff",
+          "name": "Chief of Staff",
+          "responsibility": "Act as Intake and route messages, tasks, and decisions"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Find the approved customer, project, policy, or service context"
+        },
+        {
+          "slug": "client",
+          "name": "Client Deliverables",
+          "responsibility": "Prepare customer and partner communication drafts"
+        },
+        {
+          "slug": "ops",
+          "name": "Ops",
+          "responsibility": "Maintain open work, deadlines, exceptions, and status"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Convert priorities into follow-up steps, owners, and dates"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Daily intake",
+          "action": "Classify work and identify needed context",
+          "owner": "Chief of Staff",
+          "who": [
+            {
+              "bot": "chief-of-staff",
+              "label": "Chief of Staff"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Prepare",
+          "action": "Research and draft the work product",
+          "owner": "Researcher + Client Deliverables",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            },
+            {
+              "bot": "client",
+              "label": "Client Deliverables"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Track",
+          "action": "Update tasks, deadlines, and exceptions",
+          "owner": "Ops + Planner",
+          "who": [
+            {
+              "bot": "ops",
+              "label": "Ops"
+            },
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Weekly review",
+          "action": "Approve priorities and consequential actions",
+          "owner": "Person",
+          "who": [
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Send a message or statement",
+        "Make a payment, refund, purchase, or contract change",
+        "Delete a record or change an account"
+      ],
+      "offLimits": [
+        "Access unrestricted banking",
+        "Share confidential information",
+        "Delete messages or change its own access rules"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/small-business-admin-desk/"
+    },
+    {
+      "slug": "weekly-business-review",
+      "name": "Weekly Business Review",
+      "summary": "Bring current metrics, open work, capacity conflicts, and decisions into one weekly operating brief",
+      "members": [
+        {
+          "slug": "ops",
+          "name": "Ops",
+          "responsibility": "Gather approved metrics, project status, deadlines, and exceptions"
+        },
+        {
+          "slug": "researcher",
+          "name": "Researcher",
+          "responsibility": "Act as Analyst and explain changes, gaps, and possible causes"
+        },
+        {
+          "slug": "chief-of-staff",
+          "name": "Chief of Staff",
+          "responsibility": "Prepare the decision brief and surface capacity conflicts"
+        },
+        {
+          "slug": "planner",
+          "name": "Planner",
+          "responsibility": "Turn approved decisions into owners, actions, and dates"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "step": "Gather",
+          "action": "Collect metrics, work status, and exceptions",
+          "owner": "Ops",
+          "who": [
+            {
+              "bot": "ops",
+              "label": "Ops"
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "step": "Interpret",
+          "action": "Explain movement and mark unreliable data",
+          "owner": "Researcher",
+          "who": [
+            {
+              "bot": "researcher",
+              "label": "Researcher"
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "step": "Decide",
+          "action": "Present conflicts and questions",
+          "owner": "Chief of Staff + person",
+          "who": [
+            {
+              "bot": "chief-of-staff",
+              "label": "Chief of Staff"
+            },
+            {
+              "you": true,
+              "label": "Person"
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "step": "Commit",
+          "action": "Record approved priorities, owners, and dates",
+          "owner": "Planner",
+          "who": [
+            {
+              "bot": "planner",
+              "label": "Planner"
+            }
+          ]
+        }
+      ],
+      "approvals": [
+        "Change a priority, assignment, deadline, or metric",
+        "Message a client or team member",
+        "Make a financial or personnel decision"
+      ],
+      "offLimits": [
+        "Invent missing metrics",
+        "Change records to improve performance",
+        "Expose confidential information"
+      ],
+      "testStatus": "not-tested",
+      "testLabel": "Not tested",
+      "testDate": null,
+      "testHref": null,
+      "permissions": "Bot Cabinet generates plans and packages. Hermes Desktop settings and connected-service permissions are applied by you. Passports are checklists, not locks.",
+      "learnMore": [
+        {
+          "title": "How to Become a Hermes Agent Operator",
+          "by": "Shann³",
+          "href": "https://www.hermesbible.com/flows/hermes-agent-operator-control-room-fleet"
+        },
+        {
+          "title": "Build a 3-Agent Research Department",
+          "by": "YanXbt",
+          "href": "https://www.hermesbible.com/flows/3-agent-research-department-notebooklm-obsidian"
+        }
+      ],
+      "href": "https://botcabinet.com/crew-kits/weekly-business-review/"
+    }
+  ],
+  "records": [
+    {
+      "slug": "scout-research-brief",
+      "bot": "scout",
+      "crew": false,
+      "title": "Scout prepares a first-user research brief",
+      "outcome": "A concise guide for a first-time Hermes user, shown in a recorded excerpt",
+      "summary": "The current video preserves part of a Scout conversation and result. A complete, reproducible run record is the next required test.",
+      "state": "recorded-excerpt",
+      "stateLabel": "Recorded excerpt",
+      "stateDetail": "full record incomplete",
+      "href": "https://botcabinet.com/proof/scout-research-brief/"
+    },
+    {
+      "slug": "writer-article-draft",
+      "bot": "writer",
+      "crew": false,
+      "title": "Writer test for an article draft from an approved brief",
+      "outcome": "Intended result after a preserved run: a source-bound draft with headline options and questions for the author",
+      "summary": "The exact prompt, package, and acceptance requirements are ready. The approved source brief and Hermes role run are still pending.",
+      "state": "test-designed",
+      "stateLabel": "Test designed",
+      "stateDetail": "source input pending",
+      "href": "https://botcabinet.com/proof/writer-article-draft/"
+    },
+    {
+      "slug": "publishing-desk-failed-handoff",
+      "bot": "writer",
+      "crew": true,
+      "title": "Publishing Desk runs a five-role newsletter handoff",
+      "outcome": "Five roles reach a source-checked draft and the required human-review hold",
+      "summary": "Scout, Researcher, Story, Writer and Editor completed a locked Tool Library run using the exact revised packages. Editor caught three unsupported directions; one bounded Writer correction removed them, and a fresh Editor audit passed all 25 exact boundaries. Codex semantic review found the corrected publishable claims source-faithful. Human approval remains absent.",
+      "state": "runtime-passed",
+      "stateLabel": "Runtime passed once",
+      "stateDetail": "one fixture passed; independent reproduction exposed a missing-information implication",
+      "href": "https://botcabinet.com/proof/publishing-desk-failed-handoff/"
+    },
+    {
+      "slug": "chief-of-staff-operating-brief",
+      "bot": "chief-of-staff",
+      "crew": false,
+      "title": "Chief of Staff prepares an operating brief from a meeting",
+      "outcome": "Two recorded Hermes runs separated priorities, work, decisions, and ideas; the second also exposed two unsupported additions",
+      "summary": "Two genuine Hermes prompt-contract runs are preserved. The first met the disclosed acceptance checks. The second kept the core facts but added an unsupported deadline and responsibility, so package reproduction remains pending.",
+      "state": "prompt-contract-recorded",
+      "stateLabel": "Two prompt-contract runs recorded",
+      "stateDetail": "one run passed; one exposed unsupported additions",
+      "href": "https://botcabinet.com/proof/chief-of-staff-operating-brief/"
+    },
+    {
+      "slug": "curator-lineup-review",
+      "bot": "curator",
+      "crew": false,
+      "title": "Curator reviews an overlapping Bot lineup",
+      "outcome": "Two exact-package runs found likely overlap without inventing performance evidence",
+      "summary": "The final Curator 2.0.0 archive was imported into Hermes and ran the same fictional lineup review twice. Both validation runs passed the disclosed checks; the earlier complete outputs remain published below.",
+      "state": "reproduced",
+      "stateLabel": "Reproduced",
+      "stateDetail": "exact package passed twice",
+      "href": "https://botcabinet.com/proof/curator-lineup-review/"
+    },
+    {
+      "slug": "reentry-project-resumption",
+      "bot": "reentry",
+      "crew": false,
+      "title": "Reentry restores the last approved checkpoint",
+      "outcome": "Two exact-package runs kept a newer proposal separate from approved work",
+      "summary": "The final Reentry 2.0.0 archive was imported into Hermes and ran the same fictional project-resumption test twice. Both validation runs passed the disclosed checks; the earlier complete outputs remain published below.",
+      "state": "reproduced",
+      "stateLabel": "Reproduced",
+      "stateDetail": "exact package passed twice",
+      "href": "https://botcabinet.com/proof/reentry-project-resumption/"
+    },
+    {
+      "slug": "receipt-refund-case",
+      "bot": "receipt",
+      "crew": false,
+      "title": "Receipt tracks a promised refund",
+      "outcome": "Two exact-package runs kept approval, issuance, and receipt as separate facts",
+      "summary": "The final Receipt 2.0.0 archive was imported into Hermes and ran the same fictional refund case twice. Both validation runs passed the disclosed checks; the earlier complete outputs remain published below.",
+      "state": "reproduced",
+      "stateLabel": "Reproduced",
+      "stateDetail": "exact package passed twice",
+      "href": "https://botcabinet.com/proof/receipt-refund-case/"
+    }
+  ],
+  "recordStates": [
+    {
+      "state": "test-designed",
+      "label": "Test designed"
+    },
+    {
+      "state": "test-prepared",
+      "label": "Test prepared"
+    },
+    {
+      "state": "recorded-excerpt",
+      "label": "Recorded excerpt"
+    },
+    {
+      "state": "prompt-contract-recorded",
+      "label": "Two prompt-contract runs recorded"
+    },
+    {
+      "state": "failed-runtime",
+      "label": "Runtime failed acceptance"
+    },
+    {
+      "state": "runtime-passed",
+      "label": "Runtime passed once"
+    },
+    {
+      "state": "reproduced",
+      "label": "Reproduced"
+    }
+  ],
+  "inspection": {
+    "recordsLead": "These are lab tests, usually using fictional material. They show how one exact package behaved on one disclosed task. They do not prove that a Bot is reliable, useful to a real user, or ready for unattended work.",
+    "legend": [
+      {
+        "label": "Test designed",
+        "meaning": "The test is defined, but required source material is still pending."
+      },
+      {
+        "label": "Test prepared",
+        "meaning": "Input and prompt are ready; the run has not happened."
+      },
+      {
+        "label": "Recorded excerpt",
+        "meaning": "Part of a run exists, but the full record is incomplete."
+      },
+      {
+        "label": "Prompt-contract runs",
+        "meaning": "Real outputs are preserved, but the exact downloadable profile was not imported."
+      },
+      {
+        "label": "Failed runtime",
+        "meaning": "The disclosed run happened, but its output did not pass the stated acceptance checks."
+      },
+      {
+        "label": "Runtime passed once",
+        "meaning": "One exact-package run passed; independent reproduction and human approval remain separate."
+      },
+      {
+        "label": "Reproduced",
+        "meaning": "The same package, input, and prompt passed the disclosed checks again."
+      }
+    ],
+    "disclosure": "A passed fixture is test evidence, not real-world proof. Missing and failed records stay visible so a green label cannot hide what was never tested.",
+    "evidenceKinds": [
+      {
+        "title": "Official Hermes source",
+        "copy": "Official Hermes documentation, release notes, or source code supports the statement. The listing links to that source."
+      },
+      {
+        "title": "Tested by Bot Cabinet",
+        "copy": "A Hermes Desktop test record names the Hermes version, computer system, date, exact project version, steps, and result. A later project version requires another test."
+      },
+      {
+        "title": "Example plan",
+        "copy": "This is a plan someone can adapt. It does not claim that a downloadable package or working system already exists."
+      },
+      {
+        "title": "Publisher description",
+        "copy": "The project publisher described this behavior. Bot Cabinet has not reproduced it in a Hermes Desktop test."
+      }
+    ],
+    "checks": [
+      {
+        "title": "Reachable is not useful",
+        "copy": "A page or download can respond correctly and still be confusing, outdated, or unhelpful. Keeper can find the first kind of problem. A real task test and human review are needed for the second."
+      },
+      {
+        "title": "Package checks are narrow",
+        "copy": "A package check can confirm expected files, hashes, and readable contents. It cannot prove that the instructions are good or that a Bot will handle a real job well."
+      },
+      {
+        "title": "No public record, no green light",
+        "copy": "A private log may help maintain the site, but visitors cannot inspect it. A missing or late public record means the current result is unknown."
+      },
+      {
+        "title": "A profile separates Bot data",
+        "copy": "Each Hermes profile keeps its own settings, memory, and history. The Bot can still use the files and tools that a person gives it permission to use."
+      },
+      {
+        "title": "Anyone can download a public repository",
+        "copy": "Create a new public package for sharing. Keep credentials, memories, sessions, client material, and private instructions in the live profile."
+      },
+      {
+        "title": "Public source still requires review",
+        "copy": "Hermes profile packages do not include a built-in signature from the Registry. Record the exact version and review changes before updating."
+      }
+    ],
+    "caveat": "No badge means “safe” or “works for everyone.” A package check can find known problems. A controlled task can expose failures. Neither replaces reading the requested access, testing the job yourself, or making the final decision."
+  },
+  "pages": {
+    "start": "https://botcabinet.com/start/",
+    "fit": "https://botcabinet.com/fit/",
+    "cabinet": "https://botcabinet.com/bots/",
+    "lab": "https://botcabinet.com/workshop/",
+    "crews": "https://botcabinet.com/crew-kits/",
+    "records": "https://botcabinet.com/proof/",
+    "inspection": "https://botcabinet.com/trust/"
+  }
+}

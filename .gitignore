@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*
+*.key
+*.pem
+credentials*.json
+token*.json
+.venv/
+node_modules/
+/tmp/
+harness/shots/*.tmp
+.claude/
+site-catalog/

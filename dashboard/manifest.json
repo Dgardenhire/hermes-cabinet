@@ -1,0 +1,8 @@
+{
+  "name": "bot-cabinet-v2",
+  "label": "Cabinet",
+  "description": "Find the smallest setup for a job, and plan a Bot or a crew.",
+  "version": "0.1.0",
+  "tab": { "hidden": true },
+  "api": "plugin_api.py"
+}
