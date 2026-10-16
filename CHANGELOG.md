@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.4 (2026-10-15)
+
+- Needs Hermes 0.22.0 or later, the version Cabinet's add, remove and live-catalog paths were checked on.
+- The install steps were run against a fresh copy of Hermes 0.22.1 and the README now says what a first install shows:
+  the expected "unreviewed source" notice until Cabinet is in the catalog, Rescan or a gateway restart as alternatives
+  to restarting Desktop, git as a requirement, and where Cabinet keeps its record (`$HERMES_HOME/state/bot-cabinet-v2/`).
+- botcabinet.com now publishes its catalog file, so Cabinet shows the live catalog ("Updated <date> from botcabinet.com").
+
 ## 0.3.3
 
 - Fixed: Cabinet could record, and rewrite the instructions of, a profile it didn't make. After a failed create the

@@ -4,7 +4,7 @@ Tell Cabinet the job you need done. It answers with the smallest setup that does
 led there, and then helps you act on it: add one of botcabinet.com's Bots as a Hermes bot, plan a new one, or set
 up a crew of Bots that hand work to each other. Everything Cabinet makes can be removed again from My Bots.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.3, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.4, MIT licensed.
 
 ![Start Here](harness/shots/01-start.png)
 
@@ -51,17 +51,19 @@ with several bots at once, Cabinet points to Hermes's own group chats.
 
 ## Install in Hermes Desktop
 
-Cabinet needs Hermes 0.21.5 or later.
+Cabinet needs Hermes 0.22.0 or later, and git (Hermes uses it to fetch the plugin).
 
-1. In a terminal, run `hermes plugins install Dgardenhire/hermes-cabinet --enable`. (Once Cabinet is in the Hermes
-   plugin catalog, `hermes plugins install bot-cabinet --enable` does the same at the reviewed commit.) The plugin
-   installs under its registry name, `bot-cabinet-v2`.
-2. Restart Hermes Desktop.
+1. In a terminal, run `hermes plugins install Dgardenhire/hermes-cabinet --enable`. Hermes will say this is a custom,
+   unreviewed source; that is expected until Cabinet is in the Hermes plugin catalog. Once it is,
+   `hermes plugins install bot-cabinet --enable` does the same at the reviewed commit. The plugin installs under its
+   registry name, `bot-cabinet-v2`.
+2. Restart Hermes Desktop, or open Capabilities, Plugins and press Rescan. If you run Hermes without the Desktop app,
+   run `hermes gateway restart` instead.
 3. Open **Cabinet** in the sidebar. If the page says Cabinet isn't connected, turn the plugin on under Capabilities
    and reopen the page.
 
-These steps follow the way Hermes installs other desktop plugins. They were not run while preparing this release
-(see "Verified and not verified").
+These steps were run on Oct 15, 2026 against a fresh copy of Hermes 0.22.1: the plugin installed from this repository,
+switched itself on, loaded cleanly, and its desktop page and dashboard routes answered.
 
 ## How adding works
 
@@ -94,7 +96,7 @@ is the file's contract; `tools/make_site_catalog.py` writes it.
 - Cabinet never reads, stores or passes on your sign-in, keys or model settings. Instructions that look like they hold a
   key or password are refused.
 - Cabinet's own record (what it made, saved kits, the cached catalog) is a small SQLite file and a JSON file in
-  `~/.hermes/state/bot-cabinet-v2/`. Delete that folder to forget everything Cabinet knows; your bots stay.
+  `$HERMES_HOME/state/bot-cabinet-v2/` (normally `~/.hermes/state/bot-cabinet-v2/`). Delete that folder to forget everything Cabinet knows; your bots stay.
 - A Fit Test answer's chat button, and Bot Lab's Ask Hermes to help, open a new chat and send that one message there. If the app has no composer to send through, the message goes to your clipboard instead. Cabinet sends nothing else.
 
 ## What Cabinet does on your computer (disclosure)
@@ -115,7 +117,7 @@ check each line.
   made, reads a profile's `SOUL.md`, `profile.yaml` and `bot-blueprint.yaml` to check what Hermes made, hashes its
   `SOUL.md`, `config.yaml` and skills folder to fingerprint it (the contents are not stored), and asks the gateway
   whether Hermes's own Bots catalog (`bots.catalog`) is present.
-- **Writes.** Its own record (a small SQLite file and the cached catalog) in `~/.hermes/state/bot-cabinet-v2/`. In a
+- **Writes.** Its own record (a small SQLite file and the cached catalog) in `$HERMES_HOME/state/bot-cabinet-v2/` (normally `~/.hermes/state/bot-cabinet-v2/`). In a
   profile it has just made: the display name, through Hermes's own profile metadata call, and, only if Hermes didn't
   save the planned instructions, that new profile's `SOUL.md`. Nothing else.
 - **No shell commands, no background processes, no credentials.** Cabinet runs no subprocess, starts nothing that
