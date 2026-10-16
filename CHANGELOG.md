@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.6 (2026-10-15)
+
+- Start Here links the two places the Hermes community keeps its know-how: Hermes Atlas (Kevin Simback) and the Hermes
+  Bible (iamlukethedev).
+- README: botcabinet.com now publishes its catalog file, and the verified list says what was checked on Oct 15, 2026.
+
 ## 0.3.5 (2026-10-15)
 
 - Profile folders show as `~/.hermes/profiles/<name>`, so a shared screenshot never shows the person's user name. Only

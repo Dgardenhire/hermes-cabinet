@@ -1338,6 +1338,14 @@ function StartHere() {
         jsx3("div", { className: "hk-actions", children: jsx3(Button2, { variant: "secondary", onClick: () => go({ name: "records" }), children: "Read the Test Records" }) })
       ] })
     ] }, "two"),
+    jsxs3(Card, { className: "bc-panel", children: [
+      jsx3(Label, { children: "Learning Hermes" }),
+      jsx3("h2", { className: "hk-h2 bc-serif", children: "Two places the Hermes community keeps its know-how" }),
+      jsxs3("ul", { className: "bc-ul bc-plain", children: [
+        jsxs3("li", { children: [jsx3(Link, { href: "https://hermesatlas.com/", children: "Hermes Atlas" }), " · guides, a masterclass and the ecosystem map, by Kevin Simback"] }),
+        jsxs3("li", { children: [jsx3(Link, { href: "https://www.hermesbible.com/", children: "Hermes Bible" }), " · the Hermes docs, searchable, with community flows, by iamlukethedev"] })
+      ] })
+    ] }, "learn"),
     jsx3(HandoverNotice, {}, "handover"),
     jsx3(StaleLine, {}, "stale")
   ] });

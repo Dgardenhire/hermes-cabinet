@@ -4,7 +4,7 @@ Tell Cabinet the job you need done. It answers with the smallest setup that does
 led there, and then helps you act on it: add one of botcabinet.com's Bots as a Hermes bot, plan a new one, or set
 up a crew of Bots that hand work to each other. Everything Cabinet makes can be removed again from My Bots.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.5, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.6, MIT licensed.
 
 ![Start Here](harness/shots/01-start.png)
 
@@ -85,8 +85,9 @@ suggests a Hermes group chat with its bots for talking the job through; the crew
 ## Live catalog
 
 On open and on Refresh, Cabinet asks https://botcabinet.com/catalog.json for the current catalog, checks it against a
-strict schema (`catalog_schema.py`), and keeps the last good copy. botcabinet.com does not publish that file yet, so
-Cabinet uses the catalog it shipped with (October 2, 2026) and says so in a quiet note. `docs/site-catalog-contract.md`
+strict schema (`catalog_schema.py`), and keeps the last good copy. botcabinet.com publishes it from every site build
+(since October 15, 2026), so Cabinet shows "Updated <date> from botcabinet.com"; if the site can't be reached it uses
+the last good copy, or the catalog it shipped with, and says which. `docs/site-catalog-contract.md`
 is the file's contract; `tools/make_site_catalog.py` writes it.
 
 ## Privacy
@@ -143,8 +144,10 @@ Verified by 449 tests (all pass with Hermes importable; the 3 that compare again
 - Cabinet never overwrites, edits or deletes a profile it didn't make, or one you changed.
 - The test runner fails if the real `~/.hermes` changes.
 
-Not verified: no model was called, Hermes Desktop itself was not clicked through (the page was rendered in the harness
-against the real backend), the install steps were not run, and hand-over has only met a pretend catalog.
+Verified on Oct 15, 2026: the install steps, run against a fresh copy of Hermes 0.22.1; adding and removing a Bot
+clicked through in a real Hermes Desktop, with the person's other profiles unchanged; the live catalog from
+botcabinet.com. Not verified: no model was called, and hand-over has only met a pretend Hermes Bots catalog (it isn't
+in Hermes yet).
 
 ## Develop
 
