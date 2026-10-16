@@ -33,3 +33,15 @@ def data_dir(create: bool = True) -> Path:
     if create:
         path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def display(path: Path | str) -> str:
+    """A path as the page shows it: under your home folder it reads ~/..., so a screenshot never shows your user name."""
+    text = str(path)
+    try:
+        home = str(Path.home())
+    except Exception:
+        return text
+    if home and home != "/" and (text == home or text.startswith(home.rstrip("/") + "/")):
+        return "~" + text[len(home.rstrip("/")):]
+    return text

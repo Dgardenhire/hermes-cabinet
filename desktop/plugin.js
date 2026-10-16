@@ -714,6 +714,12 @@ function shortDate(iso) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${months[m - 1]} ${d}, ${y}`;
 }
+function localDay(stamp) {
+  const when = new Date(stamp || "");
+  if (Number.isNaN(when.getTime())) return String(stamp || "").slice(0, 10);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}`;
+}
 function siteAddress(href) {
   return String(href || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
@@ -2867,7 +2873,7 @@ function MyBots() {
           jsx3(Face, { bot: faceFor(b.source && b.source.slug) || { name: b.displayName }, label: b.displayName, size: 44 }),
           jsxs3("div", { className: "hk-stack", style: { gap: 2 }, children: [
             jsx3("strong", { children: b.displayName }),
-            jsx3("span", { className: "hk-small", children: b.source ? `From ${b.source.name} · added ${shortDate((b.createdAt || "").slice(0, 10))}` : `Bot Lab plan · added ${shortDate((b.createdAt || "").slice(0, 10))}` })
+            jsx3("span", { className: "hk-small", children: b.source ? `From ${b.source.name} · added ${shortDate(localDay(b.createdAt))}` : `Bot Lab plan · added ${shortDate(localDay(b.createdAt))}` })
           ] }),
           jsx3("span", { className: "hk-grow" }),
           jsx3(Pill, { tone: STATUS_TONE[b.status] || "idle", dot: true, children: b.statusText })

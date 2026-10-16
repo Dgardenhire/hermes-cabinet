@@ -4,7 +4,7 @@ Tell Cabinet the job you need done. It answers with the smallest setup that does
 led there, and then helps you act on it: add one of botcabinet.com's Bots as a Hermes bot, plan a new one, or set
 up a crew of Bots that hand work to each other. Everything Cabinet makes can be removed again from My Bots.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.4, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.5, MIT licensed.
 
 ![Start Here](harness/shots/01-start.png)
 

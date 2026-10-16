@@ -79,6 +79,10 @@ SCENARIOS = {
     "47-mybots-hermes-bots": ("view=mybots&seed=mybots,hermes-bots", 1400, 2500),
     "48-bot-scout-handover": ("view=bot&id=scout&handover=1", 1400, 2000),
     "49-add-handover-light": ("view=add&id=scout&handover=1&theme=light", 1400, 1000),
+    # Added Oct 15 for the manual: the Daily Newspaper add finished, and a crew with its Kanban cards made on the harness board.
+    "50-add-done-newspaper": ("view=add&id=daily-newspaper&click=Add Daily Newspaper", 1400, 1200),
+    "51-setup-crew-cards": ("view=setup&id=personal-planning-desk&click=Set up Personal Planning Desk&tick=Yes, make these"
+                            "&click2=Make 4 Kanban cards", 1400, 1500),
 }
 
 

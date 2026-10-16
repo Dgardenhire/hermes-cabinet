@@ -147,6 +147,15 @@ function shortDate(iso) {
   return `${months[m - 1]} ${d}, ${y}`
 }
 
+// The day a timestamp falls on where the person is: a bot added on an Oklahoma evening read as the next day when the
+// UTC date was cut from the ISO string.
+function localDay(stamp) {
+  const when = new Date(stamp || '')
+  if (Number.isNaN(when.getTime())) return String(stamp || '').slice(0, 10)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}`
+}
+
 function siteAddress(href) {
   return String(href || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
@@ -2201,7 +2210,7 @@ function MyBots() {
         jsxs('div', { className: 'bc-mine-head', children: [
           jsx(Face, { bot: faceFor(b.source && b.source.slug) || { name: b.displayName }, label: b.displayName, size: 44 }),
           jsxs('div', { className: 'hk-stack', style: { gap: 2 }, children: [jsx('strong', { children: b.displayName }),
-            jsx('span', { className: 'hk-small', children: b.source ? `From ${b.source.name} · added ${shortDate((b.createdAt || '').slice(0, 10))}` : `Bot Lab plan · added ${shortDate((b.createdAt || '').slice(0, 10))}` })] }),
+            jsx('span', { className: 'hk-small', children: b.source ? `From ${b.source.name} · added ${shortDate(localDay(b.createdAt))}` : `Bot Lab plan · added ${shortDate(localDay(b.createdAt))}` })] }),
           jsx('span', { className: 'hk-grow' }),
           jsx(Pill, { tone: STATUS_TONE[b.status] || 'idle', dot: true, children: b.statusText }),
         ] }),

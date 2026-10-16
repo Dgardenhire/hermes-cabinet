@@ -9,6 +9,7 @@
 //   theme    dark | light                        (default dark)
 //   state    offline | loading                   (backend not mounted, or the first answer never comes)
 //   click    text of a button to click after load (repeat with click2, click3)
+//   tick     the start of a checkbox's label: ticked after click and before click2
 //   seed     taken | mybots | hermes-bots, or several joined by commas (a scene in the sandbox: profiles you already have, things Cabinet set up,
 //                                                 or Bots Hermes's own catalog added: planner, and research-analyst)
 //   live     1                                   (pretend botcabinet.com publishes a newer catalog)
@@ -121,7 +122,22 @@ for (const pair of (params.get('edit') || '').split(';').filter(Boolean)) {
   await setField(label, rest.join('='))
   await pause(700)
 }
-for (const key of ['click', 'click2', 'click3']) if (params.get(key)) { await clickText(params.get(key)); await pause(700) }
+async function tick(text) {
+  const deadline = Date.now() + 25000
+  while (Date.now() < deadline) {
+    const label = [...document.querySelectorAll('label')].find(x => x.textContent.trim().startsWith(text))
+    const box = label && (label.querySelector('input[type=checkbox],button[role=checkbox],[role=checkbox]') || (label.htmlFor && document.getElementById(label.htmlFor)))
+    if (box) { if (box.getAttribute('aria-checked') !== 'true' && !box.checked) box.click(); return true }
+    await pause(50)
+  }
+  return false
+}
+for (const key of ['click', 'tick', 'click2', 'click3']) {
+  if (!params.get(key)) continue
+  if (key === 'tick') await tick(params.get(key))
+  else await clickText(params.get(key))
+  await pause(700)
+}
 await pause(700)
 try { await document.fonts.load('16px codicon') } catch (e) { /* icons may be missing */ }
 document.documentElement.dataset.ready = '1'

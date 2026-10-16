@@ -139,7 +139,7 @@ def _profile_plan(kind: str, *, source: dict[str, Any], profile_raw: str, displa
     where = None
     if profile:
         try:
-            where = str(hermes.profile_dir(profile))
+            where = paths.display(hermes.profile_dir(profile))
         except (hermes.HermesError, safety.Unsafe) as exc:
             problems.append({"field": "profile", "message": str(exc)})
     plan: dict[str, Any] = {
@@ -725,7 +725,7 @@ def _install_view(inst: dict[str, Any] | None) -> dict[str, Any]:
         status, text = "ready", "Made by Cabinet, not changed yet"
     return {"id": inst["id"], "profile": inst["profile"], "displayName": inst["display_name"] or inst["profile"], "kind": inst["kind"],
             "source": {"slug": inst["source_slug"], "name": inst["source_name"]} if inst["source_slug"] else None,
-            "createdAt": _iso(inst["created_at"]), "where": inst["path"], "status": status, "statusText": text, "reasons": reasons,
+            "createdAt": _iso(inst["created_at"]), "where": paths.display(inst["path"]), "status": status, "statusText": text, "reasons": reasons,
             "canRemove": inst["status"] == "active" and not reasons and inst["crew_id"] is None,
             "canForget": inst["status"] == "active" and not exists, "crewId": inst["crew_id"], "description": inst["description"]}
 
@@ -761,7 +761,7 @@ def my_bots() -> dict[str, Any]:
     crews = [_crew_view(c) for c in st.crews() if c["status"] in ("active", "incomplete")]
     return {"bots": bots, "crews": crews, "kits": [_kit_view(k) for k in st.kits()], "hermesBots": hermes_bots_added(),
             "history": [{"at": _iso(e["at"]), "action": e["action"], "subject": e["subject"], "detail": e["detail"]} for e in st.events(20)],
-            "where": str(hermes.profiles_root())}
+            "where": paths.display(hermes.profiles_root())}
 
 
 def hermes_bots_added() -> list[dict[str, Any]]:
@@ -774,7 +774,7 @@ def hermes_bots_added() -> list[dict[str, Any]]:
         bot = catalog.bot(name)
         if bot:
             out.append({"slug": bot["slug"], "name": bot["name"], "catalogName": name, "profile": profile,
-                        "where": str(hermes.profiles_root() / profile)})
+                        "where": paths.display(hermes.profiles_root() / profile)})
     return out
 
 

@@ -21,12 +21,20 @@ PACKAGE = "bot_cabinet_v2"
 
 # Isolation. Every test run gets its own Hermes home and its own Cabinet data folder, set before the plugin
 # is imported, so no test can read or write the user's real ~/.hermes. tests/test_isolation.py proves it.
+# CABINET_SANDBOX_LAYOUT=home (the harness sets it) lays the sandbox out like a real install instead: Hermes's home is
+# <sandbox>/home/.hermes and Cabinet's folder is .hermes/state/bot-cabinet-v2, so the page shows ~/.hermes/profiles/<name>.
 SANDBOX = Path(tempfile.mkdtemp(prefix="cabinet-test-"))
-os.environ["HERMES_HOME"] = str(SANDBOX / "hermes-home")
-os.environ["CABINET_DATA_DIR"] = str(SANDBOX / "cabinet-data")
 os.environ["HOME"] = str(SANDBOX / "home")
+if os.environ.get("CABINET_SANDBOX_LAYOUT") == "home":
+    _HERMES = SANDBOX / "home" / ".hermes"
+    os.environ["HERMES_HOME"] = str(_HERMES)
+    os.environ["CABINET_DATA_DIR"] = str(_HERMES / "state" / "bot-cabinet-v2")
+else:
+    _HERMES = SANDBOX / "hermes-home"
+    os.environ["HERMES_HOME"] = str(_HERMES)
+    os.environ["CABINET_DATA_DIR"] = str(SANDBOX / "cabinet-data")
 (SANDBOX / "home").mkdir(parents=True, exist_ok=True)
-(SANDBOX / "hermes-home" / "profiles").mkdir(parents=True, exist_ok=True)
+(_HERMES / "profiles").mkdir(parents=True, exist_ok=True)
 atexit.register(shutil.rmtree, SANDBOX, ignore_errors=True)
 
 

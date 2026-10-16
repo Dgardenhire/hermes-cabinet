@@ -16,20 +16,77 @@ folder (tests/_load.py), so adding a bot here makes a real profile folder in tha
 - POST /__h/handover {"on": bool}  pretend this Hermes ships its own Bots catalog, on the Python side. The page's own
                                    signal is the gateway answering bots.catalog, which harness/sdk.js fakes for handover=1
 - POST /__h/gateway {method, params}  Hermes's profiles.create, done to the sandbox
-No request leaves the machine: the catalog fetch is replaced here, so a screenshot run never touches botcabinet.com.
+
+The sandbox is laid out like a real install (CABINET_SANDBOX_LAYOUT=home, see tests/_load.py): Hermes's home is
+<sandbox>/home/.hermes, so the page shows ~/.hermes/profiles/<name> as it does on a real machine.
+
+Kanban: a small in-memory board stands in for hermes_cli.kanban_db, so setting up a crew can make its cards here.
+It keeps the cards Cabinet makes (blocked, chained, assigned) until the next reset.
+
+No request leaves the machine by default: the catalog fetch is replaced here. CABINET_HARNESS_CATALOG=live lets the
+real fetch reach https://botcabinet.com/catalog.json instead, so a screenshot run can show the published catalog.
 """
 
 from __future__ import annotations
 
+import contextlib
 import copy
 import functools
 import http.server
 import json
+import os
 import shutil
 import sys
+import types
 from pathlib import Path
 
+os.environ.setdefault("CABINET_SANDBOX_LAYOUT", "home")  # before _load builds the sandbox
+
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _install_kanban_stub():
+    """An in-memory stand-in for Hermes's Kanban board (hermes_cli.kanban_db), with the calls Cabinet makes."""
+    if "hermes_cli.kanban_db" in sys.modules:
+        return sys.modules["hermes_cli.kanban_db"]
+    pkg = sys.modules.get("hermes_cli")
+    if pkg is None:
+        pkg = types.ModuleType("hermes_cli")
+        pkg.__path__ = []  # a package with nothing else in it: hermes_cli.profiles and friends still fail to import
+        sys.modules["hermes_cli"] = pkg
+    kb = types.ModuleType("hermes_cli.kanban_db")
+    kb.BOARD = []
+
+    def init_db():
+        return None
+
+    @contextlib.contextmanager
+    def connect_closing():
+        yield kb.BOARD
+
+    def create_task(conn, *, title, body, assignee=None, created_by=None, parents=(), initial_status="todo", idempotency_key=None):
+        for card in conn:
+            if idempotency_key and card["key"] == idempotency_key:
+                return card["id"]
+        cid = f"t_{len(conn) + 1:08x}"
+        conn.append({"id": cid, "title": title, "body": body, "assignee": assignee, "by": created_by, "parents": list(parents),
+                     "status": initial_status, "key": idempotency_key})
+        return cid
+
+    def archive_task(conn, cid):
+        for card in conn:
+            if card["id"] == cid and card["status"] != "archived":
+                card["status"] = "archived"
+                return True
+        return False
+
+    kb.init_db, kb.connect_closing, kb.create_task, kb.archive_task = init_db, connect_closing, create_task, archive_task
+    sys.modules["hermes_cli.kanban_db"] = kb
+    pkg.kanban_db = kb
+    return kb
+
+
+KANBAN = _install_kanban_stub()
 sys.path.insert(0, str(ROOT / "tests"))
 from _hermes_fake import fake_delete, gateway_create, hermes_bots_install, make_foreign_profile, wipe_profiles  # noqa: E402
 from _load import sub  # noqa: E402
@@ -46,10 +103,14 @@ hermes.delete_profile = fake_delete  # the sandbox's stand-in for Hermes's delet
 
 STATE = {"live": False, "handover": False}
 _real_detect = hermes.detect_core_catalog
+_real_fetch = sync.fetch
+REAL_CATALOG = os.environ.get("CABINET_HARNESS_CATALOG") == "live"
 
 
 def harness_fetch(open_fn=None, url=sync.URL, timeout=sync.TIMEOUT):
-    """The website, as the harness plays it: a 404 until /__h/live turns a newer catalog on."""
+    """The website, as the harness plays it: a 404 until /__h/live turns a newer catalog on, or the real site."""
+    if REAL_CATALOG:
+        return _real_fetch() if open_fn is None else _real_fetch(open_fn, url, timeout)
     if not STATE["live"]:
         raise sync.SyncError("botcabinet.com hasn't published its catalog file yet")
     doc = copy.deepcopy(catalog.bundled())
@@ -84,6 +145,7 @@ def reset():
     sync._STATE.update({"source": None, "updatedAt": None, "checkedAt": None, "error": None})
     STATE.update({"live": False, "handover": False})
     hermes.detect_core_catalog = _real_detect
+    KANBAN.BOARD.clear()
 
 
 def add_bot(slug, **edits):

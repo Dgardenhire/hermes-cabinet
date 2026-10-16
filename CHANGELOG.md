@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.5 (2026-10-15)
+
+- Profile folders show as `~/.hermes/profiles/<name>`, so a shared screenshot never shows the person's user name. Only
+  the display changes; records and file operations keep the full path.
+- My Bots shows the day a bot was added in the person's own time zone (an Oklahoma evening read as the next day).
+- The screenshot harness mirrors a real install (Hermes at `~/.hermes`), has a stand-in Kanban board so crew setup
+  shows its cards, and can use the live catalog.
+
 ## 0.3.4 (2026-10-15)
 
 - Needs Hermes 0.22.0 or later, the version Cabinet's add, remove and live-catalog paths were checked on.
