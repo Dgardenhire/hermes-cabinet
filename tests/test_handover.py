@@ -159,6 +159,66 @@ class DuplicateGuard(Sandbox):
         self.assertEqual(installer.my_bots()["hermesBots"], [])
 
 
+def carrying(*names):
+    """Hermes ships a Bots catalog carrying these names (what #130283 does for coach, daily-newspaper, professor, receipt)."""
+    found = {"available": True, "via": "hermes_cli.bot_catalog", "detail": "This Hermes ships its own Bots catalog.", "names": sorted(names)}
+    return mock.patch.object(hermes, "detect_core_catalog", return_value=found)
+
+
+class StaysOutOfTheLane(Sandbox):
+    """The add API, not only the page, refuses to make a Bot Hermes's catalog carries or added. No second copy, ever."""
+
+    def api_error(self, fn, *a, **k):
+        with self.assertRaises(sub("errors").ApiError) as ctx:
+            fn(*a, **k)
+        return ctx.exception
+
+    def test_a_carried_bot_is_never_planned(self):
+        with carrying("coach", "professor"):
+            err = self.api_error(installer.plan_bot, "coach")
+            self.assertEqual(err.status_code, 409)
+            self.assertTrue(err.detail["hermesBots"])
+            self.assertIn("add it in Hermes Bots", err.detail["message"])
+            self.assertEqual(self.api_error(api.bot_plan, "professor", {}).status_code, 409)
+            self.assertTrue(installer.plan_bot("scout")["ready"])  # not carried: Cabinet still adds it
+        self.assertEqual(sorted(p.name for p in hermes.profiles_root().iterdir()), [])
+
+    def test_a_bot_hermes_bots_added_under_another_name_is_never_planned_again(self):
+        hermes_bots_install("coach", "my-coach")  # even with no catalog module (an older Hermes reading the markers)
+        err = self.api_error(installer.plan_bot, "coach")
+        self.assertEqual((err.status_code, err.detail["profile"]), (409, "my-coach"))
+
+    def test_a_crew_never_makes_a_carried_member(self):
+        with carrying("coach", "professor"):
+            plan = installer.plan_crew("learning-certification-crew", {"coach": {"mode": "create"}})
+        by = {m["slug"]: m for m in plan["members"]}
+        self.assertFalse(plan["ready"])
+        for slug in ("coach", "professor"):
+            self.assertEqual(by[slug]["mode"], "existing")
+            self.assertIsNone(by[slug]["create"])
+            self.assertEqual(by[slug]["hermesBots"]["catalogName"], slug)
+            self.assertIn("add it in Hermes Bots", by[slug]["problems"][0]["message"])
+        self.assertEqual(by["planner"]["mode"], "create")
+
+    def test_a_crew_reuses_the_profile_hermes_bots_added_whatever_its_name(self):
+        hermes_bots_install("coach", "my-coach")
+        plan = installer.plan_crew("personal-planning-desk")
+        coach = next(m for m in plan["members"] if m["slug"] == "coach")
+        self.assertEqual((coach["mode"], coach["profile"], coach["create"]), ("existing", "my-coach", None))
+        self.assertTrue(plan["ready"])
+
+    def test_an_earlier_cabinet_profile_is_flagged_once_hermes_carries_it(self):
+        plan = installer.plan_bot("coach")
+        gateway_create(plan["create"]["params"])
+        installer.confirm(plan["planId"])
+        self.assertEqual(installer.my_bots()["overlaps"], [])
+        with carrying("coach"):
+            out = installer.my_bots()
+        self.assertEqual([(o["profile"], o["slug"]) for o in out["overlaps"]], [("coach", "coach")])
+        self.assertIn("second copy", out["overlaps"][0]["message"])
+        self.assertEqual(out["bots"][0]["alsoInHermesBots"], {"catalogName": "coach", "profile": None})
+
+
 class InThePage(unittest.TestCase):
     def test_the_catalog_view_carries_the_answer(self):
         out = api.catalog_view()

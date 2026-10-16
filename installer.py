@@ -161,11 +161,34 @@ def _profile_plan(kind: str, *, source: dict[str, Any], profile_raw: str, displa
     return plan
 
 
+def hermes_lane() -> tuple[set[str], dict[str, str]]:
+    """Hermes's own Bots catalog, as Cabinet sees it: (catalog names this Hermes carries, catalog name -> profile it added).
+
+    Cabinet matches a catalog name to a Cabinet Bot by its slug. Read only. Either part is empty when Hermes has no catalog.
+    """
+    det = hermes.detect_core_catalog()
+    return (set(det["names"]) if det.get("available") else set()), hermes.hermes_catalog_installs()
+
+
+def _lane_message(name: str, profile: str | None) -> str:
+    if profile:
+        return f"Hermes Bots already added {name} as the profile '{profile}'. Cabinet won't make a second copy."
+    return (f"Hermes's own Bots catalog carries {name}, so add it in Hermes Bots (Capabilities, then the Bots tab). "
+            "Cabinet won't make a second copy.")
+
+
 def plan_bot(slug: str, edits: dict[str, Any] | None = None) -> dict[str, Any]:
-    """The review screen's profile for one catalog Bot. ``edits`` may change name, profile, description, instructions and skills."""
+    """The review screen's profile for one catalog Bot. ``edits`` may change name, profile, description, instructions and skills.
+
+    A Bot Hermes's own Bots catalog carries, or already added, is never planned: Cabinet hands it to Hermes Bots.
+    """
     bot = catalog.bot(slug)
     if not bot:
         raise _bad(404, "No Bot by that name in the catalog.")
+    carried, added = hermes_lane()
+    if bot["slug"] in carried or bot["slug"] in added:
+        raise _bad(409, _lane_message(bot["name"], added.get(bot["slug"])), hermesBots=True, catalogName=bot["slug"],
+                   profile=added.get(bot["slug"]))
     edits = edits if isinstance(edits, dict) else {}
     if safety.body_size(edits) > safety.MAX_BODY_BYTES:
         raise _bad(413, "That's too much text for one bot.")
@@ -494,6 +517,7 @@ def plan_crew(slug: str, choices: dict[str, Any] | None = None) -> dict[str, Any
         raise _bad(422, "This crew has more bots than Cabinet will set up at once.")
     st = store()
     existing = [n for n in hermes.existing_profiles() if n != "default"]
+    carried, added = hermes_lane()
     steps = handoff_steps(crew)
     taken: set[str] = set()
     problems: list[dict[str, str]] = []
@@ -508,15 +532,23 @@ def plan_crew(slug: str, choices: dict[str, Any] | None = None) -> dict[str, Any
         candidates = [n for n in existing if n == base or n == m["slug"]]
         if by_cabinet and by_cabinet["profile"] not in candidates:
             candidates.insert(0, by_cabinet["profile"])
-        default_mode = "existing" if candidates else "create"
+        # Hermes Bots' lane: a member it carries is never made here. The profile it added (under any name) is offered first.
+        lane_profile = added.get(m["slug"]) if added.get(m["slug"]) in existing else None
+        handed = m["slug"] in carried or bool(lane_profile)
+        if lane_profile:
+            candidates = [lane_profile] + [c for c in candidates if c != lane_profile]
+        default_mode = "existing" if candidates or handed else "create"
         mode = pick.get("mode") if pick.get("mode") in ("create", "existing") else default_mode
+        if handed:
+            mode = "existing"
         item: dict[str, Any] = {"slug": m["slug"], "name": m["name"], "responsibility": _title(m["responsibility"]), "mode": mode,
                                 "candidates": candidates, "byCabinet": bool(by_cabinet), "resume": resume, "profile": None,
-                                "create": None, "soul": None, "problems": []}
+                                "create": None, "soul": None, "problems": [],
+                                "hermesBots": {"catalogName": m["slug"], "profile": lane_profile} if handed else None}
         mp: list[dict[str, str]] = []
         if mode == "existing":
             chosen = pick.get("profile") if isinstance(pick.get("profile"), str) else (candidates[0] if candidates else "")
-            chosen = _checked("profile", lambda: safety.profile_name(chosen), mp, "")
+            chosen = _checked("profile", lambda: safety.profile_name(chosen), mp, "") if chosen or not handed else ""
             if chosen and chosen not in existing:
                 mp.append({"field": "profile", "message": f"There's no profile called '{chosen}'."})
             if chosen and chosen in taken:
@@ -525,7 +557,8 @@ def plan_crew(slug: str, choices: dict[str, Any] | None = None) -> dict[str, Any
             # Cabinet never writes into a profile you already have, so it hands you the crew part to paste in yourself.
             item["brief"] = "\n".join(crew_section(crew_context(crew, m["slug"]))).strip() + "\n"
             if not chosen and not candidates:
-                mp.append({"field": "profile", "message": "Pick one of your profiles, or choose to make a new one."})
+                mp.append({"field": "profile", "message": (f"{_lane_message(m['name'], None)} Then come back and pick it here." if handed
+                                                           else "Pick one of your profiles, or choose to make a new one.")})
             if chosen:
                 taken.add(chosen)
         else:
@@ -758,7 +791,19 @@ def my_bots() -> dict[str, Any]:
     st = store()
     bots = [_install_view(i) for i in st.installs("active") if i["crew_id"] is None]
     crews = [_crew_view(c) for c in st.crews() if c["status"] in ("active", "incomplete")]
-    return {"bots": bots, "crews": crews, "kits": [_kit_view(k) for k in st.kits()], "hermesBots": hermes_bots_added(),
+    # A profile Cabinet made before Hermes had its own Bots catalog: say so, so adding it there isn't a silent second copy.
+    carried, added = hermes_lane()
+    overlaps = []
+    for view in bots + [m["install"] for c in crews for m in c["members"] if m.get("install")]:
+        slug = (view.get("source") or {}).get("slug")
+        if slug and (slug in carried or slug in added):
+            view["alsoInHermesBots"] = {"catalogName": slug, "profile": added.get(slug)}
+            overlaps.append({"profile": view["profile"], "slug": slug, "name": (view.get("source") or {}).get("name") or slug,
+                             "hermesProfile": added.get(slug),
+                             "message": (f"Hermes Bots also has {(view.get('source') or {}).get('name') or slug}"
+                                         + (f", as '{added[slug]}'" if added.get(slug) else "")
+                                         + f". Cabinet made '{view['profile']}' earlier; adding it in Hermes Bots too makes a second copy.")})
+    return {"bots": bots, "crews": crews, "kits": [_kit_view(k) for k in st.kits()], "hermesBots": hermes_bots_added(), "overlaps": overlaps,
             "history": [{"at": _iso(e["at"]), "action": e["action"], "subject": e["subject"], "detail": e["detail"]} for e in st.events(20)],
             "where": paths.display(hermes.profiles_root())}
 

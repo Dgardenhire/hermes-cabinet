@@ -225,6 +225,18 @@ class HermesBots(unittest.TestCase):
         self.assertIn("probeOk ? REFRESH_AFTER_MS : PROBE_RETRY_MS", probe)  # cached: a yes for 30 min, a no for a minute
         self.assertIn("probeHermesBots(force)", self.body("async function loadCatalog", "function remember"))
 
+    def test_the_backend_lane_counts_when_the_probe_is_slow_or_missing(self):
+        # What the backend read from Hermes on disk hands a carried Bot over even before (or without) the gateway probe.
+        self.assertIn("function backendLane(view)", SRC)
+        self.assertIn("if (lane && !hb.available) $hermesBots.set(", self.body("function applyCatalog", "Hermes's own Bots catalog --"))
+        probe = self.body("async function probeHermesBots", "/** The title Hermes's catalog lists")
+        self.assertIn("backendLane({ handover: $catalog.get().handover })", probe)
+
+    def test_my_bots_names_an_earlier_copy_hermes_bots_also_has(self):
+        mybots = self.body("function MyBots", "mine.bots.length ?")
+        self.assertIn("(mine.overlaps || []).length", mybots)
+        self.assertIn("'Also in Hermes Bots'", mybots)
+
     def test_hand_over_opens_hermes_bots(self):
         self.assertIn("const HERMES_BOTS_ROUTE = '/capabilities?tab=bots'", SRC)
         self.assertIn("host.navigate(HERMES_BOTS_ROUTE)", self.body("function openHermesBots", "async function loadCatalog"))

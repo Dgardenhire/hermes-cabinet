@@ -180,8 +180,19 @@ function post(path, body) {
 const REFRESH_AFTER_MS = 30 * 60 * 1000
 let lastRefresh = 0
 
+/** The Bots catalog names the backend read from Hermes on disk (hermes_cli.bot_catalog), as { name: name }, or null. */
+function backendLane(view) {
+  const h = view && view.handover
+  return h && h.available && Array.isArray(h.names) && h.names.length ? Object.fromEntries(h.names.map(n => [n, n])) : null
+}
+
 function applyCatalog(view) {
   buildCatalog(view)
+  // The gateway probe can be slow or missing; what the backend read from Hermes itself counts too, so a carried Bot is
+  // handed over even before the probe answers.
+  const lane = backendLane(view)
+  const hb = $hermesBots.get()
+  if (lane && !hb.available) $hermesBots.set({ checked: true, available: true, names: { ...lane, ...hb.names } })
   const prev = $catalog.get()
   $catalog.set({ ...prev, status: view.status, handover: view.handover, hermesAdded: view.hermesAdded || {}, installer: view.installer,
     v: prev.v + 1, refreshing: false })
@@ -217,7 +228,11 @@ async function probeHermesBots(force) {
       next = { checked: true, available: true, names }
     }
   } catch (e) {
-    // No bots.catalog on this gateway: Cabinet adds every Bot itself, as before.
+    // No bots.catalog on this gateway: fall back to what the backend read from Hermes below.
+  }
+  if (!next.available) {
+    const lane = backendLane({ handover: $catalog.get().handover })
+    if (lane) next = { checked: true, available: true, names: lane }
   }
   probeOk = next.available
   $hermesBots.set(next)
@@ -2243,6 +2258,12 @@ function MyBots() {
     jsx(Head, { eyebrow: 'My Bots', title: some ? 'What you added with Cabinet' : 'My Bots',
       lead: some ? 'Open a chat with any of them, or remove one you haven’t changed' : null }, 'head'),
     error ? jsx(Problem, { error, retry: load }, 'error') : null,
+    (mine.overlaps || []).length ? jsx(Notice, { tone: 'warn', icon: 'warning', title: 'Also in Hermes Bots',
+      action: jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => openHermesBots(null), children: 'Open Hermes Bots' }),
+      children: jsxs(Fragment, { children: [
+        jsx('p', { children: 'Cabinet made these before your Hermes had its own Bots catalog. Keep one copy of each:' }),
+        jsx('ul', { className: 'bc-ul', children: mine.overlaps.map(o => jsx('li', { children: o.message }, o.profile)) }),
+      ] }) }, 'overlaps') : null,
     !data && !error ? jsx(SkeletonPage, { header: false, label: 'Loading your bots', cards: [{ title: true, lines: 3 }] }, 'loading') : null,
     nothing ? jsx(Empty, { icon: 'briefcase', title: 'Nothing added yet',
       body: 'Bots and crews you add with Cabinet show up here, ready to chat with or remove',

@@ -733,8 +733,15 @@ function post(path, body) {
 }
 var REFRESH_AFTER_MS = 30 * 60 * 1e3;
 var lastRefresh = 0;
+function backendLane(view) {
+  const h = view && view.handover;
+  return h && h.available && Array.isArray(h.names) && h.names.length ? Object.fromEntries(h.names.map((n) => [n, n])) : null;
+}
 function applyCatalog(view) {
   buildCatalog(view);
+  const lane = backendLane(view);
+  const hb = $hermesBots.get();
+  if (lane && !hb.available) $hermesBots.set({ checked: true, available: true, names: { ...lane, ...hb.names } });
   const prev = $catalog.get();
   $catalog.set({
     ...prev,
@@ -766,6 +773,10 @@ async function probeHermesBots(force) {
       next = { checked: true, available: true, names };
     }
   } catch (e) {
+  }
+  if (!next.available) {
+    const lane = backendLane({ handover: $catalog.get().handover });
+    if (lane) next = { checked: true, available: true, names: lane };
   }
   probeOk = next.available;
   $hermesBots.set(next);
@@ -2896,6 +2907,16 @@ function MyBots() {
       lead: some ? "Open a chat with any of them, or remove one you haven’t changed" : null
     }, "head"),
     error ? jsx3(Problem, { error, retry: load }, "error") : null,
+    (mine.overlaps || []).length ? jsx3(Notice2, {
+      tone: "warn",
+      icon: "warning",
+      title: "Also in Hermes Bots",
+      action: jsx3(Button2, { variant: "secondary", size: "sm", onClick: () => openHermesBots(null), children: "Open Hermes Bots" }),
+      children: jsxs3(Fragment, { children: [
+        jsx3("p", { children: "Cabinet made these before your Hermes had its own Bots catalog. Keep one copy of each:" }),
+        jsx3("ul", { className: "bc-ul", children: mine.overlaps.map((o) => jsx3("li", { children: o.message }, o.profile)) })
+      ] })
+    }, "overlaps") : null,
     !data && !error ? jsx3(SkeletonPage, { header: false, label: "Loading your bots", cards: [{ title: true, lines: 3 }] }, "loading") : null,
     nothing ? jsx3(Empty, {
       icon: "briefcase",

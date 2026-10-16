@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.8 (2026-10-16)
+
+Hermes Bots' lane, enforced everywhere. Checked against the real Hermes Bots catalog code
+(NousResearch/hermes-agent#130283, which includes #119260) for the four Bots both catalogs carry: Daily Newspaper,
+Receipt, Coach and Professor.
+
+- Cabinet's backend refuses to add a Bot that Hermes's own Bots catalog carries or has already added, even if asked
+  directly, and names the Hermes Bots profile when there is one.
+- Crews: a member the Hermes catalog carries is never made by Cabinet. The crew uses the profile Hermes Bots added,
+  under whatever name, or asks you to add it there first.
+- A Bot Cabinet made before your Hermes had its own catalog is flagged in My Bots, so you keep one copy.
+- The page hands over using the catalog the backend reads from Hermes itself, so a slow gateway no longer lets a
+  carried Bot fall back to Cabinet's own Add.
+- The manual ships in the repository (docs/MANUAL.md, with screenshots), and the README opens with Cabinet's card.
+
 ## 0.3.7 (2026-10-16)
 
 Every page reads cleanly.

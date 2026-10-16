@@ -2,9 +2,14 @@
 
 Tell Cabinet the job you need done. It answers with the smallest setup that does it, shows which of your answers
 led there, and then helps you act on it: add one of botcabinet.com's Bots as a Hermes bot, plan a new one, or set
-up a crew of Bots that hand work to each other. Everything Cabinet makes can be removed again from My Bots.
+up a crew of Bots that hand work to each other. Anything Cabinet makes can be removed again from My Bots, as long
+as you haven't changed it.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.7, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.8, MIT licensed.
+
+![Cabinet: find the smallest setup for a job, then add Bots and crews from botcabinet.com, with undo](docs/card.png)
+
+**[Read the manual](docs/MANUAL.md)**: every screen, step by step, with screenshots.
 
 ![Start Here](harness/shots/01-start.png)
 
@@ -13,12 +18,12 @@ Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). 
 | Screen | What you do there |
 |---|---|
 | Start Here | See the 20 Bots, the 11 Crew Kits, how many have recorded test runs, and how Cabinet sits beside the Hermes Bots catalog |
-| Fit Test | Describe a job and answer five questions. Cabinet answers Assignment, Skill, Routine, Bot or Crew, with every answer that led there |
+| Fit Test | Describe a job and answer five questions. Cabinet answers Ask Hermes once, Save it as a skill, Run it on a schedule, One Bot or A crew, with every answer that led there |
 | The Cabinet | Browse every Bot with its painted portrait and test status. Add opens a review screen with the exact profile Hermes will make |
 | Bot Lab | Plan a Bot that isn't published, line by line. Make it as a profile, or save the plan as a kit |
 | Crew Kits | Review a crew's bots and handoff order, then set it up. Optional blocked Kanban cards, one per step |
 | My Bots | Everything Cabinet made, its live state, a chat link, and Remove for anything you haven't changed |
-| Test Records | What each Bot and crew has actually been tested on, including failures |
+| Test Records | What each Bot and crew has been tested on, including failures |
 
 | | |
 |---|---|
@@ -34,11 +39,16 @@ carries is added there. Cabinet works the same with or without it, and does thes
 
 - **It asks Hermes.** When the page opens, Cabinet asks this Hermes's gateway for `bots.catalog`. An answer means the
   catalog is there. An error or a timeout means it isn't, and Cabinet adds every Bot itself, as before. A yes is kept
-  for half an hour, a no is asked again after a minute, and Refresh asks straight away.
+  for half an hour, a no is asked again after a minute, and Refresh asks straight away. Cabinet's backend also reads
+  the catalog from Hermes itself, so a Bot it carries is handed over even while the gateway is slow to answer.
 - **It hands over.** For a Bot the catalog carries (the catalog name equals Cabinet's slug), Add reads "Add in Hermes
   Bots" and opens Capabilities, in the Bots tab, naming the Bot to pick there. The plugin SDK has no way to open a
   `hermes://bot/install?catalog=<name>` link, so the catalog's own review screen for that one Bot can't be opened
-  directly. Cabinet makes no copy of its own and offers no way around this.
+  directly. Cabinet makes no copy of its own, and its backend refuses to make one if asked directly.
+- **Crews follow the same rule.** Cabinet never makes a crew member the Hermes catalog carries. You add that Bot in
+  Hermes Bots first, and the crew uses it, under whatever profile name Hermes Bots gave it.
+- **It flags an earlier copy.** If Cabinet made a Bot before your Hermes had its own catalog, My Bots says Hermes Bots
+  also has it, so you keep one copy.
 - **It adds the rest.** A Bot the catalog doesn't carry keeps Cabinet's own Add, through `profiles.create`.
 - **It never adds a second copy.** A profile with a `bot-blueprint.yaml`, or whose `profile.yaml` says
   `kind: bot-catalog`, shows "Already added through Hermes Bots" in The Cabinet and in My Bots.
@@ -146,8 +156,10 @@ Verified by 449 tests (all pass with Hermes importable; the 3 that compare again
 
 Verified on Oct 15, 2026: the install steps, run against a fresh copy of Hermes 0.22.1; adding and removing a Bot
 clicked through in a real Hermes Desktop, with the person's other profiles unchanged; the live catalog from
-botcabinet.com. Not verified: no model was called, and hand-over has only met a pretend Hermes Bots catalog (it isn't
-in Hermes yet).
+botcabinet.com. Verified on Oct 16, 2026: hand-over against the real Hermes Bots catalog code in NousResearch/hermes-agent#130283
+(which includes #119260), in a clean copy of Hermes, for the four Bots both catalogs carry (Daily Newspaper, Receipt,
+Coach, Professor): single adds, crews, and a Hermes update that brings the catalog in later. Not verified: no model
+was called.
 
 ## Develop
 
