@@ -23,21 +23,8 @@ PACKAGE = "bot_cabinet_v2"
 # is imported, so no test can read or write the user's real ~/.hermes. tests/test_isolation.py proves it.
 # CABINET_SANDBOX_LAYOUT=home (the harness sets it) lays the sandbox out like a real install instead: Hermes's home is
 # <sandbox>/home/.hermes and Cabinet's folder is .hermes/state/bot-cabinet-v2, so the page shows ~/.hermes/profiles/<name>.
-def _real_user_home() -> Path:
-    """The person's real home folder, read before HOME is pointed at the sandbox (pwd on macOS and Linux)."""
-    try:
-        import pwd
-
-        return Path(pwd.getpwuid(os.getuid()).pw_dir)
-    except ImportError:  # Windows: no pwd module; Path.home() reads USERPROFILE, which nothing here changes
-        return Path.home()
-
-
-REAL_USER_HOME = _real_user_home()
 SANDBOX = Path(tempfile.mkdtemp(prefix="cabinet-test-"))
 os.environ["HOME"] = str(SANDBOX / "home")
-if os.name == "nt":  # Path.home() reads USERPROFILE on Windows, not HOME
-    os.environ["USERPROFILE"] = str(SANDBOX / "home")
 if os.environ.get("CABINET_SANDBOX_LAYOUT") == "home":
     _HERMES = SANDBOX / "home" / ".hermes"
     os.environ["HERMES_HOME"] = str(_HERMES)

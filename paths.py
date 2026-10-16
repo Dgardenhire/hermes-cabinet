@@ -36,23 +36,12 @@ def data_dir(create: bool = True) -> Path:
 
 
 def display(path: Path | str) -> str:
-    """A path as the page shows it: under your home folder it reads ~/..., so a screenshot never shows your user name.
-
-    On Windows the home folder is matched without regard to case or slash direction (C:\\Users\\Ada and c:/users/ada
-    are the same folder), and the part after ~ is shown with forward slashes, as on every other platform.
-    """
+    """A path as the page shows it: under your home folder it reads ~/..., so a screenshot never shows your user name."""
     text = str(path)
     try:
         home = str(Path.home())
     except Exception:
         return text
-    base = home.rstrip("/\\")
-    if not base:
-        return text
-    folded, folded_base = os.path.normcase(text), os.path.normcase(base)
-    if folded == folded_base:
-        return "~"
-    for sep in {"/", os.sep}:
-        if folded.startswith(folded_base + os.path.normcase(sep)):
-            return "~/" + text[len(base) + 1:].replace(os.sep, "/")
+    if home and home != "/" and (text == home or text.startswith(home.rstrip("/") + "/")):
+        return "~" + text[len(home.rstrip("/")):]
     return text

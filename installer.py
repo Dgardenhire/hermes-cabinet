@@ -55,17 +55,8 @@ def _sha(path: Path) -> str:
         return ""
 
 
-def _same_text(path: Path, text: str) -> bool:
-    """Does the file hold exactly this text, whatever line endings the platform wrote?
-
-    Hermes writes SOUL.md in text mode, so on Windows every newline lands on disk as CRLF. Comparing raw bytes
-    with the planned text would call every profile Hermes made on Windows "not the planned one".
-    """
-    try:
-        on_disk = path.read_bytes().decode("utf-8")
-    except (OSError, UnicodeDecodeError):
-        return False
-    return on_disk.replace("\r\n", "\n") == text.replace("\r\n", "\n")
+def _sha_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _bad(status: int, message: str, **extra: Any) -> ApiError:
@@ -325,7 +316,7 @@ def _verify_created(profile: str, soul: str, planned_at: float, *, made_by_cabin
     if not _born_after(directory, planned_at):
         raise _bad(409, f"A profile called '{profile}' was already there before this plan, so Cabinet won't record it as its own.")
     note = ""
-    if not _same_text(directory / "SOUL.md", soul):
+    if _sha(directory / "SOUL.md") != _sha_text(soul):
         if not made_by_cabinet:
             raise _bad(409, f"A profile called '{profile}' is there, but Cabinet didn't make it and its instructions aren't the planned ones, "
                             "so Cabinet won't record it as its own.")
@@ -335,7 +326,7 @@ def _verify_created(profile: str, soul: str, planned_at: float, *, made_by_cabin
         except OSError as exc:
             raise _bad(500, "The new profile's instructions couldn't be saved.") from exc
         note = "Hermes didn't save the instructions, so Cabinet wrote them."
-        if not _same_text(directory / "SOUL.md", soul):
+        if _sha(directory / "SOUL.md") != _sha_text(soul):
             raise _bad(500, "The new profile's instructions couldn't be saved.")
     return directory, note
 
@@ -348,7 +339,7 @@ def _made_from_plan(profile: str, soul: str, planned_at: float) -> bool:
     except (hermes.HermesError, safety.Unsafe):
         return False
     return (directory.is_dir() and not directory.is_symlink() and _born_after(directory, planned_at)
-            and hermes.hermes_catalog_name(directory) is None and _same_text(directory / "SOUL.md", soul))
+            and hermes.hermes_catalog_name(directory) is None and _sha(directory / "SOUL.md") == _sha_text(soul))
 
 
 def _record(plan: dict[str, Any], *, made_by_cabinet: bool, crew_id: int | None = None,

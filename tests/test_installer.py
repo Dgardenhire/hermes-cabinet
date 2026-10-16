@@ -312,30 +312,6 @@ class ConfirmAndRecord(Base):
         self.assertIn("Cabinet wrote them", out["note"])
         self.assertEqual((self.root() / "scout" / "SOUL.md").read_text(), plan["soul"])
 
-    def test_instructions_hermes_wrote_with_windows_line_endings_are_the_planned_ones(self):
-        # Hermes writes SOUL.md in text mode, so on Windows each newline is CRLF on disk. That is still the plan.
-        plan = installer.plan_bot("scout")
-        target = gateway_create(plan["create"]["params"], write_soul=False)
-        (target / "SOUL.md").write_bytes(plan["soul"].replace("\n", "\r\n").encode("utf-8"))
-        out = installer.confirm(plan["planId"])
-        self.assertEqual(out["note"], "", "Cabinet rewrote instructions that were already the planned ones")
-        self.assertEqual(out["install"]["status"], "ready")
-        removed = installer.remove("bot", out["install"]["id"], True)
-        self.assertEqual(removed["result"], "removed")
-
-    def test_a_lost_reply_with_windows_line_endings_is_still_recorded(self):
-        plan = installer.plan_bot("scout")
-        target = gateway_create(plan["create"]["params"], write_soul=False)
-        (target / "SOUL.md").write_bytes(plan["soul"].replace("\n", "\r\n").encode("utf-8"))
-        out = installer.confirm(plan["planId"], created=False)
-        self.assertEqual(out["install"]["status"], "ready")
-
-    def test_different_instructions_still_differ_whatever_the_line_endings(self):
-        plan = installer.plan_bot("scout")
-        target = gateway_create(plan["create"]["params"], write_soul=False)
-        (target / "SOUL.md").write_bytes((plan["soul"] + "extra line\n").replace("\n", "\r\n").encode("utf-8"))
-        self.assertEqual(self.api_error(installer.confirm, plan["planId"], created=False).status_code, 409)
-
     def test_instructions_that_cannot_be_written_fail_cleanly(self):
         plan = installer.plan_bot("scout")
         target = gateway_create(plan["create"]["params"], write_soul=False)
