@@ -172,9 +172,9 @@ def hermes_lane() -> tuple[set[str], dict[str, str]]:
 
 def _lane_message(name: str, profile: str | None) -> str:
     if profile:
-        return f"Hermes Bots already added {name} as the profile '{profile}'. Cabinet won't make a second copy."
-    return (f"Hermes's own Bots catalog carries {name}, so add it in Hermes Bots (Capabilities, then the Bots tab). "
-            "Cabinet won't make a second copy.")
+        return f"{name} is already in your bots: Hermes Bots added it as '{profile}'. Open a chat with it from your Bots list."
+    return (f"{name} comes from Hermes's own Bots catalog, so add it there: open Capabilities, then the Bots tab, and "
+            f"pick {name}.")
 
 
 def plan_bot(slug: str, edits: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -557,7 +557,8 @@ def plan_crew(slug: str, choices: dict[str, Any] | None = None) -> dict[str, Any
             # Cabinet never writes into a profile you already have, so it hands you the crew part to paste in yourself.
             item["brief"] = "\n".join(crew_section(crew_context(crew, m["slug"]))).strip() + "\n"
             if not chosen and not candidates:
-                mp.append({"field": "profile", "message": (f"{_lane_message(m['name'], None)} Then come back and pick it here." if handed
+                mp.append({"field": "profile", "message": (f"{m['name']} comes from Hermes's own Bots catalog. Add it there (Capabilities, then the Bots tab), then press "
+                                                            "Check again and the crew uses it." if handed
                                                            else "Pick one of your profiles, or choose to make a new one.")})
             if chosen:
                 taken.add(chosen)
@@ -800,9 +801,12 @@ def my_bots() -> dict[str, Any]:
             view["alsoInHermesBots"] = {"catalogName": slug, "profile": added.get(slug)}
             overlaps.append({"profile": view["profile"], "slug": slug, "name": (view.get("source") or {}).get("name") or slug,
                              "hermesProfile": added.get(slug),
-                             "message": (f"Hermes Bots also has {(view.get('source') or {}).get('name') or slug}"
-                                         + (f", as '{added[slug]}'" if added.get(slug) else "")
-                                         + f". Cabinet made '{view['profile']}' earlier; adding it in Hermes Bots too makes a second copy.")})
+                             "message": (f"{(view.get('source') or {}).get('name') or slug}: Cabinet made '{view['profile']}' before your "
+                                         "Hermes had its own Bots catalog"
+                                         + (f", and Hermes Bots added it too, as '{added[slug]}'. Keep the one you use and remove "
+                                            "the other" if added.get(slug) else
+                                            ". Keep using it; there's no need to add it again in Hermes Bots")
+                                         + ".")})
     return {"bots": bots, "crews": crews, "kits": [_kit_view(k) for k in st.kits()], "hermesBots": hermes_bots_added(), "overlaps": overlaps,
             "history": [{"at": _iso(e["at"]), "action": e["action"], "subject": e["subject"], "detail": e["detail"]} for e in st.events(20)],
             "where": paths.display(hermes.profiles_root())}

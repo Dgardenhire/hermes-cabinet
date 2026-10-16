@@ -1804,7 +1804,7 @@ function AddBot({ id }) {
         jsxs('div', { className: 'hk-stack', style: { gap: 4 }, children: [
           jsx(Label, { children: added ? 'Already in your bots' : 'Add in Hermes Bots' }),
           jsx('h1', { className: 'hk-h1 bc-display', children: added ? `${bot.name} is already added` : `Add ${bot.name} in Hermes Bots` }),
-          jsx('p', { className: 'hk-lead', children: added ? 'Hermes’s own Bots catalog added it, so Cabinet won’t make a second copy'
+          jsx('p', { className: 'hk-lead', children: added ? 'Hermes’s own Bots catalog already added it. Open a chat with it from your Bots list'
             : 'Hermes’s own Bots catalog carries this Bot, so you add it there and Cabinet makes no copy of its own' }),
         ] }),
       ] }, 'head'),
@@ -2151,11 +2151,18 @@ function SetUpCrew({ id }) {
             jsxs('div', { className: 'bc-crewbot-head', children: [
               jsx(Face, { bot: BOT[m.slug], size: 44 }),
               jsxs('div', { className: 'hk-stack', style: { gap: 2 }, children: [jsx('strong', { children: m.name }), jsx('span', { className: 'bc-member-job', children: m.responsibility }),
-                m.resume ? jsx(Pill, { tone: 'info', children: 'Made by Cabinet earlier. It carries over' }) : null] }),
-              (m.candidates.length || mine) && !m.resume ? jsx(SegmentedControl, { className: 'bc-seg', value: m.mode, options: [{ id: 'create', label: 'Make a new bot' }, { id: 'existing', label: 'Use one I have' }],
+                m.resume ? jsx(Pill, { tone: 'info', children: 'Made by Cabinet earlier. It carries over' }) : null,
+                m.hermesBots && m.hermesBots.profile ? jsx(Pill, { tone: 'info', children: 'From Hermes Bots' }) : null] }),
+              (m.candidates.length || mine) && !m.resume && !m.hermesBots ? jsx(SegmentedControl, { className: 'bc-seg', value: m.mode, options: [{ id: 'create', label: 'Make a new bot' }, { id: 'existing', label: 'Use one I have' }],
                 onChange: mode => pick(m.slug, { mode, profile: undefined }) }) : null,
             ] }),
-            mine ? jsxs('div', { className: 'bc-crewbot-body', children: [
+            m.hermesBots && !m.hermesBots.profile ? jsxs('div', { className: 'bc-crewbot-body', children: [
+              jsx('p', { className: 'hk-small', children: `${m.name} comes from Hermes’s own Bots catalog. Add it there, then check again and the crew uses it` }),
+              jsxs('div', { className: 'hk-actions', children: [
+                jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => openHermesBots(BOT[m.slug] || { name: m.name, slug: m.slug }, m.name), children: 'Open Hermes Bots' }),
+                jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => { probeHermesBots(true); replan() }, children: 'Check again' }),
+              ] }),
+            ] }) : mine ? jsxs('div', { className: 'bc-crewbot-body', children: [
               jsx('p', { className: 'hk-small', children: 'Cabinet will use this profile exactly as it is and never writes into it. Copy its part in the crew and paste it into the bot’s instructions in Hermes yourself' }),
               m.brief ? jsxs('div', { className: 'hk-actions', children: [
                 jsxs(Button, { variant: 'secondary', size: 'sm', onClick: () => copyText(m.brief, `Copied ${m.name}’s part in the crew`), children: [Icon('copy', '', 12), 'Copy its part in the crew'] }),
@@ -2261,7 +2268,7 @@ function MyBots() {
     (mine.overlaps || []).length ? jsx(Notice, { tone: 'warn', icon: 'warning', title: 'Also in Hermes Bots',
       action: jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => openHermesBots(null), children: 'Open Hermes Bots' }),
       children: jsxs(Fragment, { children: [
-        jsx('p', { children: 'Cabinet made these before your Hermes had its own Bots catalog. Keep one copy of each:' }),
+        jsx('p', { children: 'Your Hermes now has its own Bots catalog, which also carries these:' }),
         jsx('ul', { className: 'bc-ul', children: mine.overlaps.map(o => jsx('li', { children: o.message }, o.profile)) }),
       ] }) }, 'overlaps') : null,
     !data && !error ? jsx(SkeletonPage, { header: false, label: 'Loading your bots', cards: [{ title: true, lines: 3 }] }, 'loading') : null,
@@ -2316,7 +2323,7 @@ function MyBots() {
     ] }, 'crews') : null,
     viaHermes.length ? jsxs('section', { className: 'hk-section', children: [
       jsxs('div', { className: 'bc-sec-head', children: [jsx('h2', { className: 'hk-h2 bc-serif', children: 'Added through Hermes Bots' }), jsx('span', { className: 'hk-count', children: String(viaHermes.length) })] }),
-      jsx('p', { className: 'hk-small', children: 'Hermes’s own Bots catalog added these. Cabinet offers no second copy, and leaves them to Hermes' }),
+      jsx('p', { className: 'hk-small', children: 'Hermes’s own Bots catalog added these, and Hermes looks after them. Open a chat with any of them from your Bots list' }),
       jsx('div', { className: 'bc-minegrid', children: viaHermes.map(h => jsxs(Card, { className: 'bc-mine', children: [
         jsxs('div', { className: 'bc-mine-head', children: [
           jsx(Face, { bot: faceFor(h.slug) || { name: h.name }, label: h.name, size: 44 }),

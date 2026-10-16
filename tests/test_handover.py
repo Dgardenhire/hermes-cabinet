@@ -178,7 +178,7 @@ class StaysOutOfTheLane(Sandbox):
             err = self.api_error(installer.plan_bot, "coach")
             self.assertEqual(err.status_code, 409)
             self.assertTrue(err.detail["hermesBots"])
-            self.assertIn("add it in Hermes Bots", err.detail["message"])
+            self.assertIn("Capabilities, then the Bots tab", err.detail["message"])
             self.assertEqual(self.api_error(api.bot_plan, "professor", {}).status_code, 409)
             self.assertTrue(installer.plan_bot("scout")["ready"])  # not carried: Cabinet still adds it
         self.assertEqual(sorted(p.name for p in hermes.profiles_root().iterdir()), [])
@@ -197,7 +197,7 @@ class StaysOutOfTheLane(Sandbox):
             self.assertEqual(by[slug]["mode"], "existing")
             self.assertIsNone(by[slug]["create"])
             self.assertEqual(by[slug]["hermesBots"]["catalogName"], slug)
-            self.assertIn("add it in Hermes Bots", by[slug]["problems"][0]["message"])
+            self.assertIn("Capabilities, then the Bots tab", by[slug]["problems"][0]["message"])
         self.assertEqual(by["planner"]["mode"], "create")
 
     def test_a_crew_reuses_the_profile_hermes_bots_added_whatever_its_name(self):
@@ -215,7 +215,7 @@ class StaysOutOfTheLane(Sandbox):
         with carrying("coach"):
             out = installer.my_bots()
         self.assertEqual([(o["profile"], o["slug"]) for o in out["overlaps"]], [("coach", "coach")])
-        self.assertIn("second copy", out["overlaps"][0]["message"])
+        self.assertIn("no need to add it again in Hermes Bots", out["overlaps"][0]["message"])
         self.assertEqual(out["bots"][0]["alsoInHermesBots"], {"catalogName": "coach", "profile": None})
 
 

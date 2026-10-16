@@ -5,7 +5,7 @@ led there, and then helps you act on it: add one of botcabinet.com's Bots as a H
 up a crew of Bots that hand work to each other. Anything Cabinet makes can be removed again from My Bots, as long
 as you haven't changed it.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.8, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.9, MIT licensed.
 
 ![Cabinet: find the smallest setup for a job, then add Bots and crews from botcabinet.com, with undo](docs/card.png)
 

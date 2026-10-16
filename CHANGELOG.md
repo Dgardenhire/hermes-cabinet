@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.9 (2026-10-16)
+
+- When a Bot comes from Hermes's own Bots catalog, Cabinet says where to go instead of only saying no: open
+  Capabilities, then the Bots tab, and pick it. A crew member it carries gets an Open Hermes Bots button and a Check
+  again button, and the crew uses that bot once it's added.
+- A Bot already added through Hermes Bots points you to your Bots list to chat with it.
+- My Bots explains an earlier Cabinet copy plainly: keep using it, or keep whichever copy you use and remove the
+  other.
+
 ## 0.3.8 (2026-10-16)
 
 Hermes Bots' lane, enforced everywhere. Checked against the real Hermes Bots catalog code
