@@ -1,8 +1,10 @@
 """The Fit Test: turn a job into the smallest setup that does it.
 
 A port of Bot Cabinet's Bot Fit Test (botcabinet.com, ``src/lib/bot-fit-test.ts`` at site commit
-0e914a7, by Damon Gardenhire, MIT). The decision order, the wording of every summary, reason, first
-test and done check, and the routine readiness gate are the site's own. Two things are added here:
+0e914a7, by Damon Gardenhire, MIT). The decision order and the routine readiness gate are the site's
+own. The summaries, reasons, first tests, done checks and readiness steps shown on the page were
+rewritten in plain English on Oct 16, 2026; the downloadable markdown keeps the site's other wording.
+Two things are added here:
 
 - ``RULES``: the decision order written as a table, one row per rule, each naming the questions it
   reads. ``decide`` walks the table and records every question it actually looked at, so the page can
@@ -207,15 +209,15 @@ RULES: tuple[Rule, ...] = (
 def routine_graduation(a: dict[str, Any]) -> list[str]:
     steps = []
     if not a.get("workProvenManually"):
-        steps.append("Run the skill successfully by hand at least once.")
+        steps.append("Do it by hand and get a good result at least once.")
     if not clean_inline(a.get("trigger")):
-        steps.append("Define the schedule or event that starts the work.")
+        steps.append("Say what starts it: a time or an event.")
     if not clean_inline(a.get("failurePlan")):
-        steps.append("Define what happens when the work fails.")
+        steps.append("Say what should happen if it fails.")
     if not clean_inline(a.get("costLimit")):
-        steps.append("Set a cost limit.")
+        steps.append("Set the most it may spend each time.")
     if not clean_inline(a.get("shutdown")):
-        steps.append("Define how a person can stop the routine.")
+        steps.append("Say how you will stop it.")
     return steps
 
 
@@ -260,27 +262,27 @@ def decide(answers: dict[str, Any]) -> Decision:
 
 def first_test(kind: str, result: str, has_result: bool) -> str:
     if not has_result:
-        return "Describe one concrete result, then ask Hermes for a small version of it once."
+        return "Write down one concrete result, then ask Hermes for a small version of it once."
     return {
-        "assignment": f"Ask for a small version of it first: {result}",
-        "skill": f"Run the method by hand on one small example: {result}",
-        "routine": f"Run the complete routine once on demand before relying on its trigger: {result}",
-        "bot": f"Give the Bot a small sample of the work and review its response: {result}",
-        "crew": f"Give the Crew a small sample and inspect every handoff: {result}",
+        "assignment": f"Ask for a small version first: {result}",
+        "skill": f"Do it by hand on one small example: {result}",
+        "routine": f"Run it once by hand before you turn on its schedule: {result}",
+        "bot": f"Give the Bot a small sample of the work and check what it sends back: {result}",
+        "crew": f"Give the crew a small sample and check every handoff: {result}",
     }[kind]
 
 
 SHARED_DONE = [
-    "The requested result is present and usable.",
-    "The work uses only approved information and access.",
-    "Every approval point remains with a person.",
+    "You got the result you asked for, and you can use it.",
+    "It used only the information and access you allowed.",
+    "It asked you before every action on the approval list.",
 ]
 DONE_EXTRA = {
-    "assignment": "The job ends once you have reviewed the result.",
-    "skill": "The same steps and quality check can be used on another example.",
-    "routine": "The trigger, failure response, cost limit, and shutdown method work as written.",
-    "bot": "Each new request in its chat builds on the last one without the job growing.",
-    "crew": "Each role produces its part and passes the right material to the next role.",
+    "assignment": "You have checked the result, and the job is over.",
+    "skill": "The same steps and check work on a second example.",
+    "routine": "The start time, failure plan, cost limit and shutdown all work as written.",
+    "bot": "Each new request in its chat builds on the last, and the job stays the same size.",
+    "crew": "Each Bot does its part and passes the right material to the next.",
 }
 
 
@@ -306,11 +308,11 @@ def workshop_draft(a: dict[str, Any], test: str, controls: dict[str, str] | None
     access = str(a.get("access") or "").strip()
     approvals = str(a.get("approvals") or "").strip()
     if a["frequency"] == "scheduled":
-        cadence = clean_inline(a.get("trigger")) or "Define the schedule or event after the first test succeeds."
+        cadence = clean_inline(a.get("trigger")) or "Set a schedule once the first test works."
     elif a["frequency"] == "repeat":
         cadence = "When you ask it, in its chat."
     else:
-        cadence = "When a person assigns the work."
+        cadence = "When you give it the work."
     review = ["Check the result against the requested outcome, source material, access limits, and approval rules."]
     if controls:
         review += ["Automation controls:",
@@ -322,16 +324,16 @@ def workshop_draft(a: dict[str, Any], test: str, controls: dict[str, str] | None
     draft.update({
         "botName": "New Bot",
         "jobOutcome": clean_inline(a.get("result")),
-        "inputsContext": access or "Information, examples, and rules supplied for the first test.",
+        "inputsContext": access or "The information, examples and rules you give it for the first test.",
         "outputsDeliverables": clean_inline(a.get("result")) or "A draft result for review.",
         "cadenceTrigger": cadence,
         "toolsIntegrations": access or "Only what you give it in its chat.",
-        "approvalBoundaries": approvals or "Ask before sending, publishing, purchasing, deleting, or changing another system.",
+        "approvalBoundaries": approvals or "Sending, publishing, buying or deleting anything, or changing another system.",
         "firstRunTest": test,
         "audienceSuccess": "The person who requested the work confirms that the result is accurate, useful, and complete.",
         "accessSensitive": "Begin with sample or low-risk material and grant only the access required for the job.",
-        "prohibitedUncertainty": "Pause when information is missing, sources conflict, or an approval is required. Explain the issue and ask what to do.",
-        "continuityMemory": "Your confirmed preferences, decisions, and useful context from earlier chats. Nothing unrelated to the job.",
+        "prohibitedUncertainty": "Stop when information is missing, sources disagree, or it needs your approval. Say what the problem is and ask what to do.",
+        "continuityMemory": "Your confirmed preferences and decisions, and useful context about this job from earlier chats.",
         "reviewCriteria": "\n".join(review),
     })
     return draft
@@ -339,9 +341,9 @@ def workshop_draft(a: dict[str, Any], test: str, controls: dict[str, str] | None
 
 def _overlap_note(a: dict[str, Any]) -> str:
     if a["overlapsExistingRole"] == "yes":
-        return " This work overlaps with an existing Bot, so the reusable method belongs with that role."
+        return " You already have a Bot for this, so save the steps with that Bot."
     if a["overlapsExistingRole"] == "unsure":
-        return " Check for overlap before creating a new role."
+        return " Check for overlap with your Bots before you make a new one."
     return ""
 
 
@@ -355,21 +357,21 @@ def recommend(answers: dict[str, Any]) -> dict[str, Any]:
     overlap = _overlap_note(answers)
     access = split_planning_items(answers.get("access")) or ["Only the information and tools needed for the first test."]
     approvals = split_planning_items(answers.get("approvals")) or [
-        "A person reviews the result before it is sent, published, purchased, deleted, or used to change another system."]
+        "Sending or publishing anything", "Buying anything", "Deleting anything", "Changing another system"]
     rec: dict[str, Any] = {"kind": kind, "label": KINDS[kind]["label"], "owns": [result], "access": access,
                            "approvals": approvals, "firstTest": test, "doneCheck": done_checks(kind)}
     if kind == "assignment":
         rec.update(summary="Ask Hermes once",
-                   why="The work calls for one defined result. It can finish after a person reviews that result.",
+                   why="You need one result, and the job is over once you have checked it.",
                    excludes=["Ongoing ownership of nearby work",
                              "A continuing identity, schedule, or separate body of context"],
                    nextAction="Write the assignment brief and run it once.")
     elif kind == "skill":
         proof = bool(decision.graduation)
-        rec.update(summary="Prove the method as a skill before scheduling it" if proof else "Save the method as a reusable skill",
-                   why=(f"The work belongs on a schedule, but the method and operating controls need to be completed first.{overlap}"
+        rec.update(summary="Save it as a skill and test it by hand before scheduling it" if proof else "Save the steps as a skill you can reuse",
+                   why=(f"This should run on a schedule, but the steps and its schedule details aren't ready yet.{overlap}"
                         if proof else
-                        f"The same method will be useful again, while a separate continuing role adds little value.{overlap}"),
+                        f"You will do this again, so saved steps help each time. A Bot with its own chat would add little.{overlap}"),
                    owns=[result, "The repeatable steps and quality standard for producing the result"],
                    excludes=["A duplicate Bot role or separate continuing conversation",
                              "Automatic scheduling until the method and operating controls pass a manual test"],
@@ -378,8 +380,8 @@ def recommend(answers: dict[str, Any]) -> dict[str, Any]:
             rec["graduation"] = decision.graduation
     elif kind == "routine":
         controls = operating_controls(answers) or {}
-        rec.update(summary="Schedule the tested method as a routine",
-                   why="The method has succeeded by hand, and its trigger, failure response, cost limit, and shutdown method are defined.",
+        rec.update(summary="Put the tested steps on a schedule",
+                   why="It has worked by hand, and its start time, failure plan, cost limit and shutdown are all set.",
                    owns=[result, f"Trigger: {controls.get('trigger', '')}"],
                    excludes=["Work outside the tested method",
                              "Changes to the trigger, access, or limits without a new review"],
@@ -387,8 +389,8 @@ def recommend(answers: dict[str, Any]) -> dict[str, Any]:
                    routineControls=controls, operatingControls=controls)
     elif kind == "bot":
         controls = operating_controls(answers)
-        rec.update(summary="Give the ongoing job to a dedicated Bot",
-                   why=f"The work repeats and goes better with its own chat, instructions, and memory of past work.{overlap}",
+        rec.update(summary="Give this job to a Bot of its own",
+                   why=f"The job repeats and goes better with its own chat, instructions and memory of past work.{overlap}",
                    excludes=["Nearby work that belongs to another role",
                              "Automatic schedules that have not passed a manual test"],
                    nextAction="Open the prefilled Bot Lab Blueprint and review every field.",
@@ -396,8 +398,8 @@ def recommend(answers: dict[str, Any]) -> dict[str, Any]:
         if controls:
             rec["operatingControls"] = controls
     else:
-        rec.update(summary="Create a Crew with separate jobs and clear handoffs",
-                   why="Several distinct roles need to produce different parts of the work and pass material to one another.",
+        rec.update(summary="Split the job across a crew, with a clear handoff at each step",
+                   why="Different specialists each do one part of the job and pass their work to the next.",
                    owns=[result, "The order of work, handoff requirements, and final human review"],
                    excludes=["Extra roles that do not produce a distinct result",
                              "Unsupervised handoffs without a named output and acceptance check"],

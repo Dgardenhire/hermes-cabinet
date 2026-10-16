@@ -79,6 +79,9 @@ const KIND_TEXT = {
   crew: { title: 'A crew', meaning: 'Several Bots, each with its own job, passing work in order' },
 }
 
+// The site's deck ("choose where to run it") is written for the website. Inside Hermes the Bot runs here.
+const HERO_DECK = 'Add a Bot to Hermes and try it on one real task. Each Bot page shows what has been tested and what has not'
+
 const stripPeriod = text => String(text || '').replace(/[.\s]+$/, '')
 const titleWord = token => String(token || '').replace(/-/g, ' ').replace(/^./, c => c.toUpperCase())
 
@@ -511,13 +514,20 @@ function StaleLine() {
 function HandoverNotice({ bot }) {
   const hb = useValue($hermesBots)
   if (!hb.available) return null
-  const where = 'It is under Capabilities, in the Bots tab. You can also open it from the + menu next to Bots in the sidebar, with “Browse Bot Marketplace…”'
   const title = bot ? carriedBy(hb, bot) : null
+  const what = !bot ? 'Add a Bot it carries there. Cabinet adds the others and still helps you choose and plan'
+    : title ? `It carries ${bot.name} as “${title}”, so add it there`
+      : `It doesn’t carry ${bot.name}, so Cabinet adds this one for you below`
   return jsx(Notice, { tone: 'info', icon: 'sparkle', title: 'Your Hermes has its own Bots catalog',
     action: jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => openHermesBots(title ? bot : null, title), children: 'Open Hermes Bots' }),
-    children: !bot ? `${where}. Add a Bot it carries there. Cabinet adds the others and still helps you choose and plan`
-      : title ? `${where}. It carries ${bot.name} as “${title}”, so add it there`
-        : `${where}. It doesn’t carry ${bot.name}, so Cabinet adds this one for you below` })
+    children: jsxs(Fragment, { children: [
+      jsx('p', { children: what }),
+      jsx('p', { children: 'Two ways to open it:' }),
+      jsxs('ul', { className: 'bc-ul', children: [
+        jsx('li', { children: 'Capabilities, in the Bots tab' }),
+        jsx('li', { children: 'The + menu next to Bots in the sidebar, then “Browse Bot Marketplace…”' }),
+      ] }),
+    ] }) })
 }
 
 /* ------------------------------------------------------------------ frame -- */
@@ -705,9 +715,9 @@ function StartHere() {
       jsx('img', { className: 'bc-hero-art', src: IMAGES.doors, alt: '', decoding: 'async', draggable: false }),
       jsx('span', { className: 'bc-hero-scrim', 'aria-hidden': 'true' }),
       jsxs('div', { className: 'bc-hero-copy', children: [
-        jsx('p', { className: 'bc-kicker', children: 'Bot Cabinet · find a useful place to start' }),
+        jsx('p', { className: 'bc-kicker', children: 'Bot Cabinet' }),
         jsx('h1', { className: 'bc-display bc-hero-title', id: 'bc-hero-title', children: SITE.promise }),
-        jsx('p', { className: 'bc-hero-deck', children: SITE.deck }),
+        jsx('p', { className: 'bc-hero-deck', children: HERO_DECK }),
         jsxs('div', { className: 'hk-actions', children: [
           jsx(Button, { onClick: () => go({ name: 'fit' }), children: 'Take the Fit Test' }),
           jsx(Button, { variant: 'secondary', onClick: () => go({ name: 'cabinet' }), children: 'Browse The Cabinet' }),
@@ -749,15 +759,15 @@ function StartHere() {
       ] }),
       jsxs(Card, { className: 'bc-panel', children: [
         jsx(Label, { children: 'Test Records' }),
-        jsx('h2', { className: 'hk-h2 bc-serif', children: 'What has been tested, in plain view' }),
-        jsx('p', { children: 'Each Bot page says what has and has not been tested. Failed and missing records stay visible' }),
+        jsx('h2', { className: 'hk-h2 bc-serif', children: 'What has been tested so far' }),
+        jsx('p', { children: 'Each Bot page lists what was tested and what was not, failures included' }),
         jsx(Tally, { rows: botTally(), label: `${BOTS.length} Bots by test record` }),
         jsx('div', { className: 'hk-actions', children: jsx(Button, { variant: 'secondary', onClick: () => go({ name: 'records' }), children: 'Read the Test Records' }) }),
       ] }),
     ] }, 'two'),
     jsxs(Card, { className: 'bc-panel', children: [
       jsx(Label, { children: 'Learning Hermes' }),
-      jsx('h2', { className: 'hk-h2 bc-serif', children: 'Two places the Hermes community keeps its know-how' }),
+      jsx('h2', { className: 'hk-h2 bc-serif', children: 'Community guides to Hermes' }),
       jsxs('ul', { className: 'bc-ul bc-plain', children: [
         jsxs('li', { children: [jsx(Link, { href: 'https://hermesatlas.com/', children: 'Hermes Atlas' }), ' · guides, a masterclass and the ecosystem map, by Kevin Simback'] }),
         jsxs('li', { children: [jsx(Link, { href: 'https://www.hermesbible.com/', children: 'Hermes Bible' }), ' · the Hermes docs, searchable, with community flows, by iamlukethedev'] }),
@@ -843,7 +853,7 @@ const PLAIN_LINE = {
 function plainCheck(item) {
   const installed = /^The archive passed an isolated import and bundled-Skill presence check in Hermes Agent ([\d.]+) on (.+)$/.exec(item.detail || '')
   if (item.what === 'Hermes import check') {
-    return { ...item, what: 'Installs in Hermes', detail: installed ? `It installed cleanly in Hermes ${installed[1]} on ${installed[2]}, with all its skills in place` : item.detail }
+    return { ...item, what: 'Installs in Hermes', detail: installed ? `It installed cleanly in Hermes ${installed[1]}, with all its skills in place` : item.detail }
   }
   const words = {
     'Two task runs': { what: 'Two tests on a task', detail: 'It passed its first job twice, and both results met every check' },
@@ -900,9 +910,23 @@ function askBefore(items) {
   }).filter(t => (seen.has(t.toLowerCase()) ? false : seen.add(t.toLowerCase())))
 }
 
+/** A list of short items. A one-sentence item drops its closing period, so every line in a list reads the same. */
 function List({ items }) {
-  return jsx('ul', { className: 'bc-ul', children: items.map(x => jsx('li', { children: x }, x)) })
+  const tidy = x => (typeof x === 'string' && !/[.!?]\s+\S/.test(x.trim()) ? x.trim().replace(/\.$/, '') : x)
+  return jsx('ul', { className: 'bc-ul', children: items.map(x => jsx('li', { children: tidy(x) }, x)) })
 }
+
+/** Text that is really a sequence (a first task told in three or four sentences): one numbered line per sentence. */
+function sentences(text) {
+  return String(text || '').trim().split(/(?<=[.!?])\s+(?=[A-Z$“"])/).map(t => t.trim()).filter(Boolean)
+}
+function Steps({ text }) {
+  const parts = sentences(text)
+  if (parts.length < 2) return jsx('p', { children: text })
+  return jsx('ol', { className: 'bc-steps', children: parts.map((t, i) => jsx('li', { children: t }, i)) })
+}
+
+const lowerFirst = text => String(text || '').replace(/^([A-Z])(?=[a-z])/, c => c.toLowerCase())
 
 function BotPage({ id }) {
   const bot = BOT[id]
@@ -937,7 +961,7 @@ function BotPage({ id }) {
           jsx('h1', { className: 'hk-h1 bc-display', children: bot.name }),
           jsx('p', { className: 'bc-subtitle', children: bot.title }),
           jsx('p', { className: 'hk-lead', children: bot.summary }),
-          bot.audience ? jsxs('p', { children: [jsx('strong', { children: 'Best for ' }), bot.audience] }) : null,
+          bot.audience ? jsxs('p', { children: [jsx('strong', { children: 'Best for ' }), lowerFirst(bot.audience)] }) : null,
           bot.credits.length ? jsx('div', { className: 'bc-credits', children: bot.credits.map(c => jsx(Credit, { credit: c }, c.href)) }) : null,
         ] }),
         jsx(TestRecord, { bot }),
@@ -948,7 +972,7 @@ function BotPage({ id }) {
             { label: 'You give it', value: jsx(List, { items: bot.inputs }) },
             { label: 'You get back', value: jsx(List, { items: bot.outputs }) },
             bot.examples.length ? { label: 'Try asking', value: jsx(List, { items: bot.examples.slice(0, 2) }) } : null,
-            { label: 'First task', value: bot.firstMission },
+            { label: 'First task', value: jsx(Steps, { text: bot.firstMission }) },
           ] }),
         ] }),
         jsxs(Card, { children: [
@@ -980,7 +1004,11 @@ function BotPage({ id }) {
 /* ------------------------------------------------------------------ Crew Kits -- */
 
 // What Cabinet does and does not enforce for a crew, in Cabinet's own words (the site's line uses its own jargon).
-const CREW_PERMISSIONS = "Cabinet writes each bot's instructions, including the limits above. Hermes settings and access to connected accounts stay yours to set: the limits are instructions to the bots, not locks"
+const CREW_PERMISSIONS = [
+  'Cabinet writes the limits above into each bot’s instructions',
+  'The bots follow them as instructions, not locks: Hermes does not block those actions',
+  'You set Hermes settings and access to connected accounts yourself',
+]
 
 /** A crew's handoff order: portraits along a path, numbered, with the person who steps in marked. */
 function CrewTrack({ crew, size = 'lg' }) {
@@ -1087,7 +1115,7 @@ function CrewPage({ id, from }) {
     jsx(Card, { children: jsx(Facts, { rows: [
       { label: 'Asks you before', value: jsx(List, { items: c.approvals }) },
       { label: 'Off limits', value: jsx(List, { items: c.offLimits }) },
-      { label: 'Permissions', value: CREW_PERMISSIONS },
+      { label: 'Permissions', value: jsx(List, { items: CREW_PERMISSIONS }) },
       { label: 'Further reading', value: jsx('ul', { className: 'bc-ul bc-plain', children: c.learnMore.map(l => jsxs('li', { children: [jsx(Link, { href: l.href, children: l.title }), ` · ${l.by}, on the Hermes Bible`] }, l.href)) }) },
     ] }) }, 'facts'),
     jsx(SiteButton, { href: c.href }, 'open'),
@@ -1145,7 +1173,7 @@ const PLAIN_RECORD = {
     summary: 'Receipt was installed in Hermes and ran the same made-up refund case twice. Both runs passed every check.',
   },
 }
-const RECORDS_LEAD = 'These are lab tests on made-up examples. Each one shows how a Bot did on one task. None of them proves a Bot is reliable, or ready to run on its own without you checking.'
+const RECORDS_LEAD = 'These are lab tests on made-up examples, one task each. Check a Bot’s work yourself before you rely on it or let it run on its own'
 
 function plainRecord(r) {
   const state = PLAIN_STATE[r.state]
@@ -1229,7 +1257,7 @@ function FailedCrewNotice({ crew }) {
 function Notice({ tone, icon, title, children, action }) {
   return jsxs('div', { className: 'bc-notice hk-enter', 'data-tone': tone, children: [
     Icon(icon, '', 16),
-    jsxs('div', { className: 'hk-stack', style: { gap: 2 }, children: [jsx('strong', { children: title }), jsx('p', { children }),
+    jsxs('div', { className: 'hk-stack', style: { gap: 2 }, children: [jsx('strong', { children: title }), jsx('div', { className: 'bc-notice-body', children }),
       action ? jsx('div', { className: 'hk-actions bc-notice-action', children: action }) : null] }),
   ] })
 }
@@ -1720,7 +1748,7 @@ function RemoveBox({ kind, id, name, onDone, onCancel }) {
     preview ? jsx('p', { children: preview.note }) : null,
     preview && preview.will.length ? jsxs('div', { children: [jsx('strong', { children: 'Cabinet will remove' }), jsx(List, { items: preview.will })] }) : null,
     kept.length ? jsxs('div', { children: [jsx('strong', { children: 'These stay, because you have changed them' }),
-      jsx('ul', { className: 'bc-ul', children: kept.map(k => jsxs('li', { children: [jsx('span', { className: 'hk-mono', children: k.profile }), ': ', Array.isArray(k.why) ? k.why.join('; ') : String(k.why)] }, k.profile)) })] }) : null,
+      jsx('ul', { className: 'bc-ul', children: kept.map(k => jsxs('li', { children: [jsx('span', { className: 'hk-mono', children: k.profile }), Array.isArray(k.why) && k.why.length > 1 ? jsx(List, { items: k.why }) : `: ${lowerFirst(Array.isArray(k.why) ? k.why[0] || '' : String(k.why))}`] }, k.profile)) })] }) : null,
     preview && preview.reused && preview.reused.length ? jsxs('div', { children: [jsx('strong', { children: 'Yours already, never touched' }), jsx(List, { items: preview.reused })] }) : null,
     preview && preview.cards ? jsx('p', { className: 'hk-small', children: `${preview.cards} Kanban ${preview.cards === 1 ? 'card' : 'cards'} made for this crew will be archived` }) : null,
     preview && !preview.canRemove ? jsx('p', { className: 'hk-small', children: 'Cabinet will not remove this one. If you are sure, delete it in Hermes yourself' }) : null,
@@ -1776,7 +1804,11 @@ function AddBot({ id }) {
           jsx(Button, { variant: 'secondary', onClick: back, children: `Back to ${bot.name}` }),
         ] }),
       ] }, 'added') : jsxs(Card, { tone: 'info', className: 'bc-panel', children: [
-        jsx('p', { children: `Hermes lists ${bot.name} as “${carried}”. Hermes Bots opens on Capabilities, in the Bots tab: pick “${carried}” there and review it before you add it` }),
+        jsxs('ol', { className: 'bc-steps', children: [
+          jsx('li', { children: 'Press Add in Hermes Bots. It opens Capabilities, in the Bots tab' }),
+          jsx('li', { children: `Pick “${carried}”. That is the name Hermes lists ${bot.name} under` }),
+          jsx('li', { children: 'Review it there, then add it' }),
+        ] }),
         jsxs('div', { className: 'hk-actions', children: [
           jsxs(Button, { onClick: () => openHermesBots(bot, carried), children: [Icon('arrow-right', '', 13), 'Add in Hermes Bots'] }),
           jsx(Button, { variant: 'secondary', onClick: back, children: 'Cancel' }),
@@ -1837,7 +1869,7 @@ function AddBot({ id }) {
       undo && inst.id ? jsx(RemoveBox, { kind: 'bot', id: inst.id, name: inst.displayName || bot.name, onCancel: () => setUndo(false), onDone: () => go({ name: 'mybots' }) }, 'undo') : null,
       jsxs(Card, { className: 'bc-panel', children: [
         jsx('h2', { className: 'hk-h2 bc-serif', children: 'Try its first test' }),
-        jsx('p', { children: bot.firstMission }),
+        jsx(Steps, { text: bot.firstMission }),
         jsx('p', { className: 'hk-small', children: 'It does nothing on a schedule. Run the first test by hand, and set up a routine in Hermes only once you trust the result' }),
       ] }, 'first'),
     ] })
@@ -1987,7 +2019,13 @@ function GroupChatTip({ crew }) {
   const list = names.length === 2 ? names.join(' and ') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
   return jsxs(Card, { className: 'bc-panel', children: [
     jsxs('h2', { className: 'hk-h2 bc-serif', children: [Icon('organization', '', 16), ' Start a group chat with these bots'] }),
-    jsx('p', { children: `To talk the job through with all of them at once, open the + menu next to Bots in the sidebar, choose New group chat, and add ${list}. Every bot in the room hears the conversation, and you can @mention one by name` }),
+    jsx('p', { children: 'To talk the job through with all of them at once:' }),
+    jsxs('ol', { className: 'bc-steps', children: [
+      jsx('li', { children: 'Open the + menu next to Bots in the sidebar' }),
+      jsx('li', { children: 'Choose New group chat' }),
+      jsx('li', { children: `Add ${list}` }),
+    ] }),
+    jsx('p', { children: 'Every bot in the room hears the conversation, and you can @mention one by name' }),
     jsx('p', { className: 'hk-small', children: 'A group chat has no set order and doesn’t stop for you at a step. For the crew’s order, use the Kanban cards below' }),
   ] })
 }
@@ -2223,7 +2261,8 @@ function MyBots() {
           jsx(Pill, { tone: STATUS_TONE[b.status] || 'idle', dot: true, children: b.statusText }),
         ] }),
         jsx('p', { className: 'hk-mono bc-mine-where', children: b.where }),
-        b.reasons.length ? jsxs('p', { className: 'hk-small', children: ['Why Cabinet won’t remove it: ', b.reasons.join('; ')] }) : null,
+        b.reasons.length === 1 ? jsxs('p', { className: 'hk-small', children: ['Why Cabinet won’t remove it: ', lowerFirst(b.reasons[0])] })
+          : b.reasons.length ? jsxs('div', { className: 'hk-small', children: ['Why Cabinet won’t remove it:', jsx(List, { items: b.reasons })] }) : null,
         jsxs('div', { className: 'hk-actions', children: [
           b.status !== 'missing' ? jsxs(Button, { size: 'sm', onClick: () => openBotChat(b.profile), children: [Icon('comment', '', 12), 'Open chat'] }) : null,
           b.canRemove || b.status === 'changed' ? jsx(Button, { variant: 'secondary', size: 'sm', onClick: () => setOpen({ kind: 'remove', rk: 'bot', id: b.id, name: b.displayName }), children: b.canRemove ? 'Remove' : 'Why it stays' }) : null,

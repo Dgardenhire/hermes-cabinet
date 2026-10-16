@@ -4,7 +4,7 @@
 manifest_version: 2
 name: bot-cabinet-v2
 label: Cabinet
-version: 0.3.6
+version: 0.3.7
 description: Tell Cabinet the job you need done and it answers with the smallest setup that does it, then helps you plan a Bot or a crew.
 author: Damon Gardenhire
 license: MIT

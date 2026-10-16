@@ -20,7 +20,7 @@ catalog = sub("catalog")
 sync = sub("sync")
 schema = sub("catalog_schema")
 
-NOW = datetime.datetime(2026, 10, 4, 12, 0, tzinfo=datetime.timezone.utc)
+NOW = datetime.datetime(2026, 10, 17, 12, 0, tzinfo=datetime.timezone.utc)
 
 
 class FakeResponse:
@@ -55,7 +55,7 @@ def opener(response=None, raises=None, calls=None):
     return open_fn
 
 
-def newer(doc=None, date="2026-10-04"):
+def newer(doc=None, date="2026-10-17"):
     d = copy.deepcopy(doc or catalog.bundled())
     d["generatedAt"] = date
     d["bots"][0] = dict(d["bots"][0], summary="Changed on the live site.")
@@ -232,18 +232,18 @@ class Refresh(Base):
     def test_a_live_copy_is_used_saved_and_reported(self):
         out = sync.refresh(self.data, opener(FakeResponse(newer())), NOW)
         self.assertEqual(out["source"], "live")
-        self.assertEqual(out["label"], "Updated Oct 4 from botcabinet.com")
+        self.assertEqual(out["label"], "Updated Oct 17 from botcabinet.com")
         self.assertIsNone(out["error"])
         self.assertEqual(catalog.bots()[0]["summary"], "Changed on the live site.")
         saved = json.loads((self.data / sync.CACHE_NAME).read_text())
-        self.assertEqual(saved["fetchedAt"], "2026-10-04T12:00:00Z")
-        self.assertEqual(saved["doc"]["generatedAt"], "2026-10-04")
+        self.assertEqual(saved["fetchedAt"], "2026-10-17T12:00:00Z")
+        self.assertEqual(saved["doc"]["generatedAt"], "2026-10-17")
         self.assertEqual([p.name for p in self.data.iterdir()], [sync.CACHE_NAME])  # no temp file left behind
 
     def test_offline_with_nothing_saved_uses_the_bundled_copy(self):
         out = sync.refresh(self.data, opener(raises=urllib.error.URLError("offline")), NOW)
         self.assertEqual(out["source"], "bundled")
-        self.assertEqual(out["label"], "Showing the saved copy from Oct 2")
+        self.assertEqual(out["label"], "Showing the saved copy from Oct 15")
         self.assertIn("couldn't reach", out["error"])
         self.assertEqual(catalog.bots()[0]["summary"], catalog.bundled()["bots"][0]["summary"])
 
@@ -252,7 +252,7 @@ class Refresh(Base):
         out = sync.refresh(self.data, opener(raises=err), NOW)
         self.assertEqual(out["source"], "bundled")
         self.assertIn("hasn't published", out["error"])
-        self.assertEqual(out["label"], "Showing the saved copy from Oct 2")
+        self.assertEqual(out["label"], "Showing the saved copy from Oct 15")
         # Not an error on screen: the expected state today is a calm note.
         self.assertEqual(out["tone"], "calm")
         self.assertEqual(out["note"], sync.CALM_NOTE)
@@ -272,23 +272,23 @@ class Refresh(Base):
         catalog.set_active(None)
         out = sync.refresh(self.data, opener(raises=socket.timeout()), NOW)
         self.assertEqual(out["source"], "cache")
-        self.assertEqual(out["label"], "Showing the saved copy from Oct 4")
+        self.assertEqual(out["label"], "Showing the saved copy from Oct 17")
         self.assertEqual(catalog.bots()[0]["summary"], "Changed on the live site.")
 
     def test_a_bad_live_file_keeps_the_last_good_copy(self):
         sync.refresh(self.data, opener(FakeResponse(newer())), NOW)
-        bad = newer(date="2026-10-05")
+        bad = newer(date="2026-10-18")
         bad["bots"][0]["slug"] = "BAD SLUG"
         out = sync.refresh(self.data, opener(FakeResponse(bad)), NOW)
         self.assertEqual(out["source"], "cache")
-        self.assertEqual(out["updatedAt"], "2026-10-04")
+        self.assertEqual(out["updatedAt"], "2026-10-17")
         self.assertIn("didn't pass", out["error"])
 
     def test_an_older_file_cannot_replace_a_newer_saved_copy(self):
-        sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-04"))), NOW)
+        sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-17"))), NOW)
         out = sync.refresh(self.data, opener(FakeResponse(newer(date="2026-09-01"))), NOW)
         self.assertEqual(out["source"], "cache")
-        self.assertEqual(out["updatedAt"], "2026-10-04")
+        self.assertEqual(out["updatedAt"], "2026-10-17")
         self.assertIn("older", out["error"])
 
     def test_a_file_older_than_the_bundled_copy_is_refused_with_no_saved_copy(self):
@@ -300,12 +300,12 @@ class Refresh(Base):
         out = sync.refresh(self.data, opener(FakeResponse(newer(date="2099-01-01"))), NOW)
         self.assertEqual(out["source"], "bundled")
         self.assertIn("future", out["error"])
-        later = sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-04"))), NOW)
+        later = sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-17"))), NOW)
         self.assertEqual(later["source"], "live")
 
     def test_the_same_day_is_accepted(self):
-        sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-04"))), NOW)
-        out = sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-04"))), NOW)
+        sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-17"))), NOW)
+        out = sync.refresh(self.data, opener(FakeResponse(newer(date="2026-10-17"))), NOW)
         self.assertEqual(out["source"], "live")
 
     def test_startup_prefers_the_saved_copy_over_the_bundle(self):

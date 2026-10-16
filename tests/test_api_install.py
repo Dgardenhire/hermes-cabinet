@@ -52,7 +52,7 @@ class CatalogView(Base):
         self.assertEqual(len(out["bots"]), 20)
         self.assertEqual(len(out["crews"]), 11)
         self.assertEqual(out["status"]["source"], "bundled")
-        self.assertEqual(out["status"]["label"], "Showing the saved copy from Oct 2")
+        self.assertEqual(out["status"]["label"], "Showing the saved copy from Oct 15")
 
     def test_the_long_role_text_stays_on_the_backend(self):
         for b in api.catalog_view()["bots"]:
@@ -63,11 +63,11 @@ class CatalogView(Base):
 
     def test_refresh_reports_the_live_copy(self):
         live = json.loads(json.dumps(catalog.bundled()))
-        live["generatedAt"] = "2026-10-04"
+        live["generatedAt"] = "2026-10-16"
         live["bots"][0]["summary"] = "Fresh from the site."
         with mock.patch.object(sync, "fetch", return_value=schema.validate_catalog(live)):
             out = api.catalog_refresh()
-        self.assertEqual(out["status"]["label"], "Updated Oct 4 from botcabinet.com")
+        self.assertEqual(out["status"]["label"], "Updated Oct 16 from botcabinet.com")
         self.assertEqual(out["bots"][0]["summary"], "Fresh from the site.")
 
     def test_refresh_when_the_site_has_no_file_yet(self):
@@ -78,7 +78,7 @@ class CatalogView(Base):
 
     def test_a_live_bot_the_snapshot_never_had_can_be_added(self):
         live = json.loads(json.dumps(catalog.bundled()))
-        live["generatedAt"] = "2026-10-03"
+        live["generatedAt"] = "2026-10-16"
         live["bots"].append({"slug": "brand-new", "name": "Brand New", "title": "A newly published Bot", "category": "writing",
                              "summary": "Does a new thing.", "outcome": "Do the new thing", "role": "You are Brand New. Do the new thing and nothing else.",
                              "inputs": ["A request"], "outputs": ["A result"]})

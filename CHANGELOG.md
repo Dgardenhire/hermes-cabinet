@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.7 (2026-10-16)
+
+Every page reads cleanly.
+
+- A Bot's first task shows as numbered steps when it has more than one, on its page and after you add it. How-to
+  text (the group chat tip, the hand-over to Hermes Bots, crew permissions, why a Bot can't be removed) is a list.
+- Fit Test answers are in plain English: each summary, reason, first test, done check and schedule step.
+- "Asks you before" lists one action per line, and Bot Lab's default approvals are four plain items.
+- The catalog is botcabinet.com's corrected copy (Oct 16): "Off limits" lists what a Bot never does instead of
+  orders to the Bot, jobs read in the second person, crew members say what they do, and Daily Newspaper's repeated
+  approval line is gone.
+- The install check states its date once, beside its heading.
+- Plainer Start Here and Test Records wording, and the README's promise about removal matches what Cabinet does: it
+  removes only what it made and you haven't changed.
+
 ## 0.3.6 (2026-10-15)
 
 - Start Here links the two places the Hermes community keeps its know-how: Hermes Atlas (Kevin Simback) and the Hermes

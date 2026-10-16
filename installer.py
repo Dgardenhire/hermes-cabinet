@@ -471,15 +471,14 @@ def what_hermes_does() -> dict[str, Any]:
     return {
         "can": ["Make one Hermes profile for each bot in the crew, each with its role written into its instructions.",
                 "Keep a record of the crew: who is in it, the order of the handoffs, and where it stops for you.",
-                "On your say-so, make one Kanban card per step, in order, each assigned to the right bot."],
+                "When you ask, make one Kanban card per step, in order, each assigned to the right bot."],
         "cannot": ["Run the crew by itself. Hermes does not read the handoff order and pass work along on its own.",
                    "Move work from one step to the next for you. You do that by releasing the next Kanban card, "
                    "or by asking each bot yourself.",
                    "Turn on any schedule, connect an account or send anything. Those stay yours."],
-        "groupChat": "Hermes has group chats too. In the sidebar's Bots list, press + and choose New group chat, then add these "
-                     "bots. Every bot in the room hears the conversation, and you can @mention one by name. A message from you "
-                     "gets a few short turns from the bots at most, in no set order, so a group chat suits talking the job "
-                     "through together. The crew's order and its stops for you stay with the Kanban cards.",
+        "groupChat": "Hermes has group chats too: press + next to Bots in the sidebar, choose New group chat and add these bots. "
+                     "Every bot hears the conversation, and you can @mention one by name. The bots reply in no set order, so "
+                     "use it to talk the job through. The crew's order and its stops for you stay with the Kanban cards.",
         "cards": "The cards start blocked. Nothing runs until you release the first one in Kanban.",
     }
 
@@ -793,7 +792,7 @@ def removal_preview(kind: str, item_id: int) -> dict[str, Any]:
                 "keep": [] if will else [{"profile": v["profile"], "why": v["reasons"] or [v["statusText"]]}],
                 "canRemove": bool(will) and v["crewId"] is None, "where": v["where"],
                 "note": ("This profile belongs to a crew. Remove the crew instead." if v["crewId"] is not None else
-                         "Cabinet removes only the profile it made, through Hermes's own delete.")}
+                         "Cabinet removes a profile only if it made it and you haven't changed it.")}
     if kind == "crew":
         crew = st.get_crew(item_id)
         if not crew or crew["status"] not in ("active", "incomplete"):
@@ -815,7 +814,7 @@ def removal_preview(kind: str, item_id: int) -> dict[str, Any]:
             raise _bad(404, "Cabinet has no record of that kit.")
         return {"kind": kind, "id": item_id, "name": kit["name"], "will": [], "keep": [], "canRemove": True,
                 "note": "A kit is only a saved plan. Removing it doesn't touch any Hermes profile."}
-    raise _bad(404, "Unknown thing to remove.")
+    raise _bad(404, "Cabinet can remove a bot, a crew or a kit, and this is none of those.")
 
 
 def _delete_untouched(st: Store, inst: dict[str, Any]) -> str:

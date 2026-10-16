@@ -121,11 +121,13 @@ def best_crew(text: str) -> tuple[dict[str, Any] | None, int]:
     job, job_score = best_job(text)
     scored = []
     for i, c in enumerate(crews()):
-        s = 2 * _score(q, c["name"], c["summary"]) + _score(q, *(m["responsibility"] for m in c["members"]))
+        own = _score(q, c["name"], c["summary"])
+        s = 2 * own + _score(q, *(m["responsibility"] for m in c["members"]))
         if job and set(job["botSlugs"]) <= {m["slug"] for m in c["members"]}:
             s += job_score
-        scored.append((s, i, c))
-    score, _, found = max(scored, key=lambda s: (s[0], -s[1]))
+        scored.append((s, own, i, c))
+    # A tie goes to the crew whose own name and summary match the job more closely, then to catalog order.
+    score, _, _, found = max(scored, key=lambda s: (s[0], s[1], -s[2]))
     return (found, score) if score else (None, 0)
 
 

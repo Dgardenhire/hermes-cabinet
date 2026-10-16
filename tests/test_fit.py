@@ -50,14 +50,14 @@ class SiteCases(unittest.TestCase):
                 failurePlan="Stop and notify the owner.", costLimit="$1 per run.", shutdown="Disable the schedule.")
         self.assertEqual(r["kind"], "skill")
         self.assertIn("before scheduling it", r["summary"])
-        self.assertIn("Run the skill successfully by hand at least once.", r["graduation"])
+        self.assertIn("Do it by hand and get a good result at least once.", r["graduation"])
 
     def test_skill_names_every_missing_routine_control(self):
         r = rec(frequency="scheduled", workProvenManually=True)
         self.assertEqual(r["kind"], "skill")
-        self.assertEqual(r["graduation"], ["Define the schedule or event that starts the work.",
-                                           "Define what happens when the work fails.", "Set a cost limit.",
-                                           "Define how a person can stop the routine."])
+        self.assertEqual(r["graduation"], ["Say what starts it: a time or an event.",
+                                           "Say what should happen if it fails.", "Set the most it may spend each time.",
+                                           "Say how you will stop it."])
 
     def test_bot_for_distinct_repeated_work_with_continuing_context(self):
         r = rec(frequency="repeat", needsContinuingContext=True, overlapsExistingRole="no",
@@ -90,7 +90,7 @@ class SiteCases(unittest.TestCase):
     def test_no_duplicate_bot_when_the_job_already_belongs_to_one(self):
         r = rec(frequency="repeat", needsContinuingContext=True, overlapsExistingRole="yes")
         self.assertEqual(r["kind"], "skill")
-        self.assertIn("existing Bot", r["why"])
+        self.assertIn("already have a Bot for this", r["why"])
         self.assertIn("duplicate", " ".join(r["excludes"]))
 
     def test_skill_while_overlap_is_unresolved(self):
@@ -123,7 +123,7 @@ class SiteCases(unittest.TestCase):
         r = fit.recommend(dict(fit.EMPTY_ANSWERS))
         self.assertEqual(r["kind"], "assignment")
         self.assertEqual(r["owns"], ["Define one concrete result before starting."])
-        self.assertIn("Describe one concrete result", r["firstTest"])
+        self.assertIn("Write down one concrete result", r["firstTest"])
 
 
 class FormCompleteness(unittest.TestCase):
