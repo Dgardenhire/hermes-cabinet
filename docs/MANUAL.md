@@ -1,4 +1,4 @@
-<!-- Generated from the web manual (https://linchpin.studio/hermes/cabinet). Edit that page, then regenerate. -->
+<!-- Generated from the web manual, now at https://botcabinet.com/hermes/manual/. Its install section was edited by hand to match that page. -->
 
 ![Bot Cabinet](manual/cabinet-wordmark.png)
 
@@ -32,25 +32,29 @@ Cabinet is an independent plugin developed by Damon Gardenhire. It is not an off
 
 ## Getting it running
 
-You install Cabinet once. After that, it lives in the Hermes Desktop sidebar.
+You install Cabinet once, from inside Hermes Desktop. After that, it lives in the sidebar.
 
 You need Hermes 0.22.0 or later, and git, which Hermes uses to download plugins.
 
-1. **Open a terminal and run this line.**
+**[Install in Hermes](https://botcabinet.com/hermes/manual/#install)**. Do this on the computer where Hermes Desktop is installed. The button is on the web manual, because GitHub doesn't open `hermes://` links. You can also paste this into your browser:
 
-   On Windows that's PowerShell; on a Mac or Linux it's Terminal. It downloads Cabinet and turns it on.
+```text
+hermes://plugin/install?repo=Dgardenhire/hermes-cabinet&enable=1
+```
 
-   ```bash
-   hermes plugins install Dgardenhire/hermes-cabinet --enable
-   ```
+1. **Press Install in Hermes.** Hermes Desktop opens and shows Cabinet's install screen. Press **Install**.
 
-   Hermes will warn that the plugin comes from an unreviewed source. That's normal for a plugin installed straight from GitHub.
+   Hermes marks Cabinet as Unverified because it comes straight from GitHub. That is expected for now. Once Cabinet is in the Hermes plugin catalog, you can instead open **Capabilities**, then **Plugins**, find Cabinet and press **Install**.
 
-2. **Restart Hermes Desktop.** Quit it fully and open it again. Or open **Capabilities**, then **Plugins**, and press **Rescan**.
+2. **Open Cabinet in the sidebar.** If it isn't there yet, quit Hermes Desktop fully and open it again.
 
-3. **Open Cabinet in the sidebar.**
+3. **If it says Cabinet isn't connected,** open **Capabilities**, turn Cabinet on, and open the page again. You can browse while it's off, but adding a Bot needs it on.
 
-4. **If it says Cabinet isn't connected,** open **Capabilities**, turn Cabinet on, and open the page again. You can browse while it's off, but adding a Bot needs it on.
+**Prefer the terminal?** On Windows, open PowerShell. On a Mac or Linux, open Terminal. Run this line, then quit Hermes Desktop fully and open it again.
+
+```bash
+hermes plugins install Dgardenhire/hermes-cabinet --enable
+```
 
 ## Your first look
 

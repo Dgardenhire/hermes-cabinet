@@ -1,5 +1,22 @@
 # Cabinet for Hermes
 
+## Install
+
+**[Install in Hermes](https://botcabinet.com/hermes/manual/#install)** · **[Read the manual](docs/MANUAL.md)** ([on the web](https://botcabinet.com/hermes/manual/))
+
+1. Press **Install in Hermes** on [botcabinet.com/hermes/manual](https://botcabinet.com/hermes/manual/#install), on the
+   computer where Hermes Desktop is installed. GitHub doesn't open `hermes://` links, so the button lives there; you
+   can also paste `hermes://plugin/install?repo=Dgardenhire/hermes-cabinet&enable=1` into your browser. Hermes Desktop
+   opens Cabinet's install screen. Press **Install**. Hermes marks Cabinet as Unverified because it comes straight
+   from GitHub; that is expected for now.
+   Once Cabinet is in the Hermes plugin catalog, open **Capabilities → Plugins** in Hermes Desktop, find Cabinet and
+   press **Install**.
+2. Open **Cabinet** in the sidebar. If it isn't there yet, quit Hermes Desktop fully and open it again.
+3. If it says Cabinet isn't connected, open **Capabilities**, turn Cabinet on, and open the page again.
+
+Prefer the terminal? On Windows open PowerShell, on a Mac or Linux open Terminal, and run
+`hermes plugins install Dgardenhire/hermes-cabinet --enable`. Then quit Hermes Desktop fully and open it again.
+
 Tell Cabinet the job you need done. It answers with the smallest setup that does it, shows which of your answers
 led there, and then helps you act on it: add one of botcabinet.com's Bots as a Hermes bot, plan a new one, or set
 up a crew of Bots that hand work to each other. Anything Cabinet makes can be removed again from My Bots, as long
@@ -8,8 +25,6 @@ as you haven't changed it.
 Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.10, MIT licensed.
 
 ![Cabinet: find the smallest setup for a job, then add Bots and crews from botcabinet.com, with undo](docs/card.png)
-
-**[Read the manual](docs/MANUAL.md)**: every screen, step by step, with screenshots.
 
 ![Start Here](harness/shots/01-start.png)
 
@@ -63,14 +78,20 @@ with several bots at once, Cabinet points to Hermes's own group chats.
 
 Cabinet needs Hermes 0.22.0 or later, and git (Hermes uses it to fetch the plugin).
 
-1. In a terminal, run `hermes plugins install Dgardenhire/hermes-cabinet --enable`. Hermes will say this is a custom,
-   unreviewed source; that is expected until Cabinet is in the Hermes plugin catalog. Once it is,
-   `hermes plugins install bot-cabinet --enable` does the same at the reviewed commit. The plugin installs under its
+1. Press **Install in Hermes** on [botcabinet.com/hermes/manual](https://botcabinet.com/hermes/manual/#install). It
+   opens `hermes://plugin/install?repo=Dgardenhire/hermes-cabinet&enable=1`, and Hermes Desktop shows its install
+   screen; press **Install**. Hermes marks this source Unverified; that is expected until Cabinet is in the Hermes
+   plugin catalog. Once it is, open **Capabilities → Plugins**, find Cabinet and press **Install** (or use
+   `hermes://plugin/install?catalog=bot-cabinet`), which installs the reviewed commit. The plugin installs under its
    registry name, `bot-cabinet-v2`.
-2. Restart Hermes Desktop, or open Capabilities, Plugins and press Rescan. If you run Hermes without the Desktop app,
-   run `hermes gateway restart` instead.
-3. Open **Cabinet** in the sidebar. If the page says Cabinet isn't connected, turn the plugin on under Capabilities
-   and reopen the page.
+2. Open **Cabinet** in the sidebar. If it isn't there yet, quit Hermes Desktop fully and open it again, or open
+   Capabilities, Plugins and press Rescan. If the page says Cabinet isn't connected, turn the plugin on under
+   Capabilities and reopen the page.
+
+From a terminal instead: `hermes plugins install Dgardenhire/hermes-cabinet --enable` (PowerShell on Windows,
+Terminal on a Mac or Linux), then restart Hermes Desktop. Once Cabinet is in the catalog,
+`hermes plugins install bot-cabinet --enable` does the same at the reviewed commit. If you run Hermes without the
+Desktop app, run `hermes gateway restart` instead of restarting the app.
 
 These steps were run on Oct 15, 2026 against a fresh copy of Hermes 0.22.1: the plugin installed from this repository,
 switched itself on, loaded cleanly, and its desktop page and dashboard routes answered.
