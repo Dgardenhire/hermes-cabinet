@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from contextlib import closing
 import shutil
 import sqlite3
 import tempfile
@@ -312,6 +313,30 @@ class ConfirmAndRecord(Base):
         self.assertIn("Cabinet wrote them", out["note"])
         self.assertEqual((self.root() / "scout" / "SOUL.md").read_text(), plan["soul"])
 
+    def test_instructions_hermes_wrote_with_windows_line_endings_are_the_planned_ones(self):
+        # Hermes writes SOUL.md in text mode, so on Windows each newline is CRLF on disk. That is still the plan.
+        plan = installer.plan_bot("scout")
+        target = gateway_create(plan["create"]["params"], write_soul=False)
+        (target / "SOUL.md").write_bytes(plan["soul"].replace("\n", "\r\n").encode("utf-8"))
+        out = installer.confirm(plan["planId"])
+        self.assertEqual(out["note"], "", "Cabinet rewrote instructions that were already the planned ones")
+        self.assertEqual(out["install"]["status"], "ready")
+        removed = installer.remove("bot", out["install"]["id"], True)
+        self.assertEqual(removed["result"], "removed")
+
+    def test_a_lost_reply_with_windows_line_endings_is_still_recorded(self):
+        plan = installer.plan_bot("scout")
+        target = gateway_create(plan["create"]["params"], write_soul=False)
+        (target / "SOUL.md").write_bytes(plan["soul"].replace("\n", "\r\n").encode("utf-8"))
+        out = installer.confirm(plan["planId"], created=False)
+        self.assertEqual(out["install"]["status"], "ready")
+
+    def test_different_instructions_still_differ_whatever_the_line_endings(self):
+        plan = installer.plan_bot("scout")
+        target = gateway_create(plan["create"]["params"], write_soul=False)
+        (target / "SOUL.md").write_bytes((plan["soul"] + "extra line\n").replace("\n", "\r\n").encode("utf-8"))
+        self.assertEqual(self.api_error(installer.confirm, plan["planId"], created=False).status_code, 409)
+
     def test_instructions_that_cannot_be_written_fail_cleanly(self):
         plan = installer.plan_bot("scout")
         target = gateway_create(plan["create"]["params"], write_soul=False)
@@ -437,11 +462,12 @@ class Touched(Base):
 
     def test_a_chat_in_the_state_database(self):
         iid, d = self.made()
-        with sqlite3.connect(d / "state.db") as db:
+        # closing(): a sqlite3 connection's own `with` only commits; left open, Windows can't delete the profile after.
+        with closing(sqlite3.connect(d / "state.db")) as db, db:
             db.execute("CREATE TABLE messages (id INTEGER PRIMARY KEY, role TEXT)")
             db.execute("INSERT INTO messages(role) VALUES ('assistant')")
         self.assertEqual(self.reasons(iid), [])  # Hermes's own greeting isn't you chatting
-        with sqlite3.connect(d / "state.db") as db:
+        with closing(sqlite3.connect(d / "state.db")) as db, db:
             db.execute("INSERT INTO messages(role) VALUES ('user')")
         self.assertTrue(any("chatted" in r for r in self.reasons(iid)))
 

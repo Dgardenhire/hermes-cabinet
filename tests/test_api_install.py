@@ -203,7 +203,7 @@ class LabPlanIsNowTheSamePath(Base):
         self.assertTrue(out["ready"])
         self.assertTrue(out["planId"])
         self.assertEqual(out["create"]["params"]["no_skills"], True)
-        self.assertTrue(out["where"].endswith("/profiles/lookout"))
+        self.assertTrue(out["where"].replace("\\", "/").endswith("/profiles/lookout"), out["where"])
         gateway_create(out["create"]["params"])
         recorded = installer.confirm(out["planId"])
         self.assertEqual(recorded["install"]["profile"], "lookout")

@@ -10,14 +10,13 @@ from __future__ import annotations
 
 import hashlib
 import os
-import pwd
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from _hermes_fake import fake_delete, gateway_create, wipe_profiles
-from _load import SANDBOX, sub
+from _load import REAL_USER_HOME, SANDBOX, sub
 
 hermes = sub("hermes_bridge")
 installer = sub("installer")
@@ -25,8 +24,9 @@ paths = sub("paths")
 sync = sub("sync")
 catalog = sub("catalog")
 
-REAL_HOME = Path(pwd.getpwuid(os.getuid()).pw_dir)
-REAL_HERMES = REAL_HOME / ".hermes"
+REAL_HOME = REAL_USER_HOME
+# Hermes's default home: ~/.hermes on macOS and Linux, %LOCALAPPDATA%\\hermes on Windows.
+REAL_HERMES = Path(os.environ["LOCALAPPDATA"]) / "hermes" if os.name == "nt" and os.environ.get("LOCALAPPDATA") else REAL_HOME / ".hermes"
 
 
 def real_state():

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.10 (2026-10-17)
+
+Proven on Windows, Linux and macOS: on each, a fresh Hermes installed the official way, Cabinet installed as a user
+installs it, Hermes's own validation, and a real run that adds and removes a Bot and sets up and removes a crew.
+
+- Windows: Hermes saves a Bot's instructions with Windows line endings, so Cabinet now compares instructions whatever
+  the line endings. Before, a Bot made on Windows looked changed and Cabinet wouldn't offer to remove it.
+- Windows: paths under your home folder show as ~/..., so a screenshot never shows your user name.
+- The manual is rewritten in plain English for every computer.
+
 ## 0.3.9 (2026-10-16)
 
 - When a Bot comes from Hermes's own Bots catalog, Cabinet says where to go instead of only saying no: open
