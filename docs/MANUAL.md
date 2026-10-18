@@ -8,7 +8,7 @@ Hermes Desktop plugin
 
 Tell Cabinet a job you need done. It suggests the simplest setup that can do it, then helps you add a Bot, plan your own, or set up a crew.
 
-- **Version:** 0.3.9
+- **Version:** 0.3.10
 - **Needs:** Hermes 0.22.0 or later
 - **License:** MIT
 - **Source:** [GitHub](https://github.com/Dgardenhire/hermes-cabinet)
@@ -36,15 +36,13 @@ You install Cabinet once, from inside Hermes Desktop. After that, it lives in th
 
 You need Hermes 0.22.0 or later, and git, which Hermes uses to download plugins.
 
-**[Install in Hermes](https://botcabinet.com/hermes/manual/#install)**. Do this on the computer where Hermes Desktop is installed. The button is on the web manual, because GitHub doesn't open `hermes://` links. You can also paste this into your browser:
+1. **Find Cabinet in the plugin catalog.** In Hermes Desktop, open **Capabilities**, then **Plugins**. Find Cabinet and press **Install**.
 
-```text
-hermes://plugin/install?repo=Dgardenhire/hermes-cabinet&enable=1
-```
+   Or press **[Install in Hermes](https://botcabinet.com/hermes/manual/#install)** on the web manual, on the computer where Hermes Desktop is installed. It opens the same screen. You can also paste this into your browser:
 
-1. **Press Install in Hermes.** Hermes Desktop opens and shows Cabinet's install screen. Press **Install**.
-
-   Hermes marks Cabinet as Unverified because it comes straight from GitHub. That is expected for now. Once Cabinet is in the Hermes plugin catalog, you can instead open **Capabilities**, then **Plugins**, find Cabinet and press **Install**.
+   ```text
+   hermes://plugin/install?catalog=bot-cabinet-v2
+   ```
 
 2. **Open Cabinet in the sidebar.** If it isn't there yet, quit Hermes Desktop fully and open it again.
 
