@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Serve the repo for the harness, with /api/* answered by the real backend (api.py).
 
-    /usr/bin/python3 harness/serve.py [port]       then open http://127.0.0.1:<port>/harness/
+    python3 harness/serve.py [port]       then open http://127.0.0.1:<port>/harness/
 
 Standard library only. The /api routes mirror dashboard/plugin_api.py exactly.
 
@@ -108,28 +108,17 @@ REAL_CATALOG = os.environ.get("CABINET_HARNESS_CATALOG") == "live"
 
 
 def harness_fetch(open_fn=None, url=sync.URL, timeout=sync.TIMEOUT):
-    """The website, as the harness plays it: a 404 until /__h/live turns a newer catalog on, or the real site."""
+    """The website, as the harness plays it: the bundled catalog (as botcabinet.com publishes it), a changed one once
+    /__h/live turns it on, or the real site."""
     if REAL_CATALOG:
         return _real_fetch() if open_fn is None else _real_fetch(open_fn, url, timeout)
     if not STATE["live"]:
-        raise sync.SyncError("botcabinet.com hasn't published its catalog file yet")
+        return schema.validate_catalog(copy.deepcopy(catalog.bundled()))
     doc = copy.deepcopy(catalog.bundled())
-    doc["generatedAt"] = "2026-10-04"
-    doc["siteCommit"] = "c0ffee1 2026-10-04"
+    # Dated the same day as the bundled copy, so Cabinet takes it as current (an older date is refused as stale).
+    doc["generatedAt"] = catalog.bundled()["generatedAt"]
+    doc["siteCommit"] = "c0ffee1 " + doc["generatedAt"]
     doc["bots"][0] = dict(doc["bots"][0], summary="Finds timely topics, useful developments, and promising opportunities in the areas you choose, now with a source for every item.")
-    doc["bots"].append({
-        "slug": "minutes-taker", "name": "Minutes Taker", "title": "Meeting notes and follow-ups", "category": "planning",
-        "summary": "Turns your meeting notes into clear minutes, decisions and follow-up tasks.", "audience": "People who run recurring meetings",
-        "outcome": "Turn the notes I provide into short minutes with decisions and owners",
-        "inputs": ["Your meeting notes or a transcript", "Who attended"], "outputs": ["Short minutes", "A list of decisions", "Follow-up tasks with owners"],
-        "examples": ["Turn these notes into minutes."], "firstMission": "Make minutes from one fictional meeting and check every decision against the notes.",
-        "approvals": ["Ask before sending minutes to anyone"], "offLimits": ["Do not invent decisions that are not in the notes"], "worksWith": ["planner"],
-        "role": "You are Minutes Taker. Turn only the notes the owner provides into short minutes. List decisions and follow-ups with owners. "
-                "Never invent a decision. Ask before sending minutes to anyone.",
-        "skills": [{"name": "Minutes Taker core Skill", "whenToUse": "When I paste meeting notes.", "steps": ["Confirm the notes.", "Draft the minutes.", "Mark anything unclear."]}],
-        "routine": {"trigger": "Run when I provide notes.", "activation": "manual-test-required"}, "riskLevel": "Moderate", "credits": [],
-        "href": "https://botcabinet.com/bots/minutes-taker/", "test": {"status": "not-tested", "line": "Import checked; a full task run is still pending"},
-    })
     return schema.validate_catalog(doc)
 
 

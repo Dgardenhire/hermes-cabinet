@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build data/catalog.json (the catalog snapshot, schema version 2) from the Bot Cabinet site.
 
-    /usr/bin/python3 tools/make_catalog.py <path-to-bot-cabinet-site> [--ref <git ref>]
+    python3 tools/make_catalog.py <path-to-bot-cabinet-site> [--ref <git ref>]
 
 The site repository is read READ ONLY with ``git show`` at one commit, so its working tree is never
 touched and nothing is downloaded. The commit must be the one ``data/site.json`` was built from

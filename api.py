@@ -87,7 +87,8 @@ def fit_form() -> dict[str, Any]:
                           "choices": [{"value": v, "label": label} for v, label in q.choices]})
     jobs = []
     for job in catalog.common_jobs():
-        jobs.append({**job, "answers": PRESETS[job["slug"]], "credit": CREDITS.get(f"job:{job['slug']}")})
+        if job["slug"] in PRESETS:  # a quick start needs its ready answers; a job without them is left out
+            jobs.append({**job, "answers": PRESETS[job["slug"]], "credit": CREDITS.get(f"job:{job['slug']}")})
     return {
         "questions": questions,
         "required": ["result", *fit.BRANCH_QUESTIONS],

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.11 (2026-10-18)
+
+Safety fixes from a security review. If you use Remove, read the first one.
+
+- Remove now checks every file in a bot's folder before deleting it. Before, it only checked the instructions,
+  settings, skills, memories, chats and schedules, so work files, notes and a changed keys file (.env) could be
+  deleted with the bot. Now any file you added, changed or removed keeps the bot, hidden files too, and Cabinet
+  tells you why. Only what Hermes writes by itself as a bot runs (caches, locks, logs, snapshots and downloads)
+  doesn't count, so a bot you have only opened can still be removed.
+- Bots made by Cabinet 0.3.10 or older stay. Those versions didn't keep a list of their files, so Cabinet can't be
+  sure nothing was added. You can still delete them in Hermes.
+- If Cabinet can't read a bot's files or its chat history, the bot stays. Before, an unreadable chat history (for
+  example in a folder with '#' or '%' in its name) counted as "never chatted".
+- Pressing Add a second time on an old, finished plan no longer takes over a bot you made yourself with the same
+  name. Cabinet says the plan was already used.
+- The Fit Test no longer breaks if the live catalog drops one of its quick-start jobs.
+- Bots that Hermes's own Bots catalog added are spotted in more cases, and Cabinet leaves a bot alone whenever it
+  can't tell.
+- Profile names Windows can't use as a folder name (com1 to com9, lpt1 to lpt9) are refused.
+- When Cabinet updates, its newer built-in catalog is used instead of an older saved copy.
+- botcabinet.com now publishes its catalog, so if the file is missing Cabinet says so as a warning.
+
 ## 0.3.10 (2026-10-17)
 
 Proven on Windows, Linux and macOS: on each, a fresh Hermes installed the official way, Cabinet installed as a user

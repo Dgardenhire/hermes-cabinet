@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import re
 import sys
 import types
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from _load import ROOT, sub
@@ -72,6 +74,54 @@ class FitForm(unittest.TestCase):
     def test_morning_newspaper_credits_karen_x_cheng(self):
         job = next(j for j in api.fit_form()["commonJobs"] if j["slug"] == "personal-morning-newspaper")
         self.assertIn("Karen X. Cheng", job["credit"]["line"])
+
+
+class FitWithADifferentLiveCatalog(unittest.TestCase):
+    """botcabinet.com may publish a catalog that passes the schema but differs from the copy Cabinet ships with."""
+
+    schema = sub("catalog_schema")
+
+    def tearDown(self):
+        catalog.set_active(None)
+
+    def use(self, mutate):
+        doc = copy.deepcopy(catalog.bundled())
+        mutate(doc)
+        catalog.set_active(self.schema.validate_catalog(doc))
+
+    def test_a_missing_quick_start_job_is_left_out(self):
+        self.use(lambda d: d.update(jobs=[j for j in d["jobs"] if j["slug"] != "weekly-newsletter"]))
+        slugs = [j["slug"] for j in api.fit_form()["commonJobs"]]
+        self.assertNotIn("weekly-newsletter", slugs)
+        self.assertIn("personal-morning-newspaper", slugs)
+
+    def test_no_quick_start_jobs_at_all(self):
+        self.use(lambda d: d.update(jobs=[dict(d["jobs"][0], slug="some-other-job")]))
+        self.assertEqual(api.fit_form()["commonJobs"], [])
+        self.assertTrue(api.fit_answer(body())["kind"])
+
+    def test_a_quick_start_job_without_preset_answers_is_left_out(self):
+        jobs = [{"slug": "brand-new-job", "title": "New", "outcome": "x", "lead": "", "optional": []}]
+        with unittest.mock.patch.object(catalog, "common_jobs", return_value=jobs):
+            self.assertEqual(api.fit_form()["commonJobs"], [])
+
+    def test_empty_lists_never_crash_the_matching(self):
+        catalog.set_active({**catalog.bundled(), "crews": [], "jobs": [], "bots": []})
+        self.assertEqual(catalog.best_job("plan a launch"), (None, 0))
+        self.assertEqual(catalog.best_bot("plan a launch"), (None, 0))
+        self.assertEqual(catalog.best_crew("plan a launch"), (None, 0))
+        self.assertIsNone(catalog.best_member("plan a launch", {"members": []}))
+        self.assertEqual(catalog.common_jobs(), [])
+        for kind in ("crew", "bot", "skill"):
+            self.assertIsInstance(api._match(kind, "plan a launch"), dict)
+
+    def test_the_schema_wants_at_least_one_crew_and_one_job(self):
+        for key in ("crews", "jobs"):
+            doc = copy.deepcopy(catalog.bundled())
+            doc[key] = []
+            with self.assertRaises(self.schema.SchemaError) as caught:
+                self.schema.validate_catalog(doc)
+            self.assertIn(f"{key}: must be a list of 1 to", " ".join(caught.exception.problems))
 
 
 class FitAnswer(unittest.TestCase):
@@ -311,6 +361,17 @@ class Manifest(unittest.TestCase):
         ctx = Ctx()
         pkg.register(ctx)
         self.assertEqual(ctx.calls, [])
+
+
+    def test_every_place_names_the_same_version(self):
+        import json
+        version = re.search(r"(?m)^version: (\S+)$", (ROOT / "plugin.yaml").read_text(encoding="utf-8")).group(1)
+        self.assertEqual(sys.modules["bot_cabinet_v2"].__version__, version)
+        self.assertEqual(json.loads((ROOT / "dashboard" / "manifest.json").read_text(encoding="utf-8"))["version"], version)
+        self.assertTrue(sub("sync").USER_AGENT.endswith("/" + version))
+        self.assertEqual(re.search(r"(?m)^## (\S+) \(", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")).group(1), version)
+        self.assertIn(f"Version {version},", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn(f"**Version:** {version}", (ROOT / "docs" / "MANUAL.md").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

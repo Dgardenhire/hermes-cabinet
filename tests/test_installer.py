@@ -24,6 +24,8 @@ safety = sub("safety")
 store_mod = sub("store")
 paths = sub("paths")
 sync = sub("sync")
+# A made-up key, built from parts so no scanner mistakes this file for one holding a real key.
+FAKE_KEY = "sk" + "-" + "abcdefghijklmnopqrstuvwxyz" + "123456"
 
 
 class Base(unittest.TestCase):
@@ -225,14 +227,14 @@ class EditsAreChecked(Base):
         ok = installer.plan_bot("scout", {"soul": "# Scout\n\nYou are Scout. Only ever find topics.\n"})
         self.assertTrue(ok["ready"])
         self.assertEqual(ok["create"]["params"]["soul"], "# Scout\n\nYou are Scout. Only ever find topics.\n")
-        for bad in ("", "short", "x" * (safety.MAX_SOUL_BYTES + 1), "You are Scout. Key sk-abcdefghijklmnopqrstuvwxyz123456",
+        for bad in ("", "short", "x" * (safety.MAX_SOUL_BYTES + 1), "You are Scout. Key " + FAKE_KEY,
                     "You are Scout.‮ do things", "You are Scout.\x00 do things", 5, None):
             plan = installer.plan_bot("scout", {"soul": bad})
             self.assertFalse(plan["ready"], repr(bad)[:40])
             self.assertIsNone(plan["create"])
 
     def test_the_refusal_does_not_echo_a_secret(self):
-        secret = "sk-abcdefghijklmnopqrstuvwxyz123456"
+        secret = FAKE_KEY
         plan = installer.plan_bot("scout", {"soul": f"You are Scout. Use {secret} always."})
         self.assertNotIn(secret, json.dumps(plan["problems"]))
 
@@ -284,6 +286,18 @@ class ConfirmAndRecord(Base):
         self.assertTrue(again["already"])
         self.assertEqual(again["install"]["id"], first["install"]["id"])
         self.assertEqual(len(installer.store().installs()), 1)
+
+    def test_a_replayed_confirm_never_takes_over_a_profile_the_owner_made_later(self):
+        plan, out = self.add("scout")
+        fake_delete("scout")
+        installer.forget(out["install"]["id"])  # the owner deleted it in Hermes and pressed Forget
+        mine = make_foreign_profile("scout", "You are MY hand-written bot with my own rules.\n")
+        for created in (True, False):
+            err = self.api_error(installer.confirm, plan["planId"], created=created)
+            self.assertEqual(err.status_code, 409)
+            self.assertIn("already used", err.detail["message"])
+        self.assertIn("MY hand-written", (mine / "SOUL.md").read_text())
+        self.assertEqual([i["status"] for i in installer.store().installs()], ["removed"])
 
     def test_confirm_before_hermes_made_it(self):
         plan = installer.plan_bot("scout")
@@ -365,8 +379,9 @@ class ConfirmAndRecord(Base):
 
     def test_nothing_secret_is_recorded(self):
         _, out = self.add("scout")
-        dump = json.dumps(installer.store().get_install(out["install"]["id"]))
-        self.assertNotIn(".env", dump)
+        inst = installer.store().get_install(out["install"]["id"])
+        # The keys file is listed by size and time only: no hash of it is ever kept
+        self.assertEqual(inst["fingerprint"]["files"][".env"][3], "")
         db = (Path(self._tmp.name) / "cabinet.db").read_bytes()
         self.assertNotIn(b"api_key", db.lower())
 
@@ -435,10 +450,15 @@ class Touched(Base):
         (d / "memories" / "note.md").write_text("remember this")
         self.assertTrue(any("memories" in r for r in self.reasons(iid)))
 
-    def test_hidden_files_in_memories_do_not_count(self):
+    def test_hidden_files_in_memories_count_too(self):
         iid, d = self.made()
-        (d / "memories" / ".keep").write_text("")
-        self.assertEqual(self.reasons(iid), [])
+        (d / "memories" / ".notes").write_text("remember this")
+        self.assertIn("It has saved memories", self.reasons(iid))
+
+    def test_hidden_files_in_sessions_count_too(self):
+        iid, d = self.made()
+        (d / "sessions" / ".draft.json").write_text("{}")
+        self.assertIn("You have chatted with it", self.reasons(iid))
 
     def test_scheduled_jobs(self):
         iid, d = self.made()
@@ -471,10 +491,29 @@ class Touched(Base):
             db.execute("INSERT INTO messages(role) VALUES ('user')")
         self.assertTrue(any("chatted" in r for r in self.reasons(iid)))
 
-    def test_a_state_database_cabinet_cannot_read_is_not_a_reason(self):
+    def test_a_state_database_cabinet_cannot_read_keeps_the_profile(self):
         iid, d = self.made()
         (d / "state.db").write_text("not a database")
+        self.assertIn("Cabinet couldn't read its chat history", self.reasons(iid))
+        self.assertEqual(self.api_error(installer.remove, "bot", iid, True).status_code, 409)
+        self.assertTrue(d.exists())
+
+    def test_a_state_database_with_no_chats_table_yet_is_fine(self):
+        iid, d = self.made()
+        with closing(sqlite3.connect(d / "state.db")) as db, db:
+            db.execute("CREATE TABLE sessions (id INTEGER PRIMARY KEY)")
         self.assertEqual(self.reasons(iid), [])
+
+    def test_a_chat_is_seen_whatever_characters_the_folder_name_holds(self):
+        # '#', '?' and '%' mean something in a file: address. '?' can't be in a Windows file name.
+        name = "Damon's #1 100% folder" + ("" if os.name == "nt" else " (really?)")
+        d = Path(self._tmp.name) / name / "profile"
+        d.mkdir(parents=True)
+        with closing(sqlite3.connect(d / "state.db")) as db, db:
+            db.execute("CREATE TABLE messages (id INTEGER PRIMARY KEY, role TEXT)")
+            db.execute("INSERT INTO messages(role) VALUES ('user')")
+        self.assertEqual(installer._user_messages(d), 1)
+        self.assertIn("You have chatted with it", installer.touched_reasons(d, {}))
 
     def test_a_missing_profile(self):
         iid, d = self.made()
@@ -482,6 +521,235 @@ class Touched(Base):
         view = [v for v in installer.my_bots()["bots"] if v["id"] == iid][0]
         self.assertEqual(view["status"], "missing")
         self.assertTrue(view["canForget"])
+
+
+class EveryFileCounts(Base):
+    """Remove deletes the whole folder, so every file in it is checked against the list Cabinet kept when it made it."""
+
+    def made(self):
+        _, out = self.add("scout")
+        return out["install"]["id"], self.root() / "scout"
+
+    def refused(self, iid, d):
+        preview = installer.removal_preview("bot", iid)
+        self.assertFalse(preview["canRemove"])
+        err = self.api_error(installer.remove, "bot", iid, True)
+        self.assertEqual(err.status_code, 409)
+        self.assertTrue(d.exists())
+        self.delete.assert_not_called()
+        return err.detail["reasons"]
+
+    def test_the_record_lists_every_file(self):
+        iid, d = self.made()
+        files = installer.store().get_install(iid)["fingerprint"]["files"]
+        for rel in ("SOUL.md", "config.yaml", "profile.yaml", ".env"):
+            self.assertIn(rel, files)
+        self.assertNotIn("MY_NEW_KEY", json.dumps(files))  # sizes and hashes only, never what a file says
+
+    def test_work_files_keep_it(self):
+        iid, d = self.made()
+        (d / "workspace" / "report-i-worked-on.md").write_text("hours of work")
+        self.assertIn("Files have been added to it", self.refused(iid, d))
+        self.assertEqual((d / "workspace" / "report-i-worked-on.md").read_text(), "hours of work")
+
+    def test_a_new_file_at_the_top_keeps_it(self):
+        iid, d = self.made()
+        (d / "notes.txt").write_text("mine")
+        self.assertIn("Files have been added to it", self.refused(iid, d))
+
+    def test_a_changed_keys_file_keeps_it(self):
+        iid, d = self.made()
+        (d / ".env").write_text("MY_NEW_KEY=abc\n")
+        reasons = self.refused(iid, d)
+        self.assertIn("Its keys file (.env) has been changed", reasons)
+        self.assertNotIn("abc", json.dumps(reasons))
+
+    def test_a_deleted_file_keeps_it(self):
+        plan = installer.plan_bot("scout")
+        d = gateway_create(plan["create"]["params"])
+        (d / "workspace" / "README.md").write_text("made with the profile")
+        iid = installer.confirm(plan["planId"])["install"]["id"]
+        (d / "workspace" / "README.md").unlink()
+        self.assertIn("Files have been removed from it", self.refused(iid, d))
+
+    def test_a_changed_file_with_the_same_size_keeps_it(self):
+        iid, d = self.made()
+        text = (d / "profile.yaml").read_text()
+        (d / "profile.yaml").write_text(text.upper() if text.upper() != text else text.lower())
+        st = os.stat(d / "profile.yaml")
+        self.assertTrue(self.refused(iid, d))
+        self.assertEqual(os.stat(d / "profile.yaml").st_size, st.st_size)
+
+    def test_a_link_added_inside_keeps_it_and_is_never_followed(self):
+        iid, d = self.made()
+        outside = Path(self._tmp.name) / "outside.txt"
+        outside.write_text("not Cabinet's")
+        try:
+            os.symlink(outside, d / "workspace" / "link.txt")
+        except (OSError, NotImplementedError):
+            self.skipTest("this system can't make links")
+        self.assertIn("Files have been added to it", self.refused(iid, d))
+        self.assertTrue(outside.exists())
+
+    def test_what_hermes_writes_as_it_runs_does_not_count(self):
+        iid, d = self.made()
+        (d / "logs" / "agent.log").write_text("started\n")
+        (d / "logs" / "gateway").mkdir()
+        (d / "logs" / "gateway" / "run.log").write_text("ok\n")
+        for name in ("state.db-wal", "state.db-shm", "gateway.pid", "gateway_state.json"):
+            (d / name).write_text("x")
+        (d / "plans" / "empty-folder").mkdir()  # an empty folder holds nothing to lose
+        self.assertEqual(installer.removal_preview("bot", iid)["will"], ["scout"])
+        self.assertEqual(installer.remove("bot", iid, True)["result"], "removed")
+
+    def first_run(self, d):
+        """What a profile looks like after Hermes has opened it and run once, without the owner adding anything."""
+        files = ["state.db-wal", "state.db-shm", "projects.db", "gateway.pid", "gateway.lock", "gateway_state.json",
+                 "processes.json", "auth.lock", ".env.lock", ".backup.lock", ".update_check", "errors.log",
+                 "context_length_cache.yaml", "models_dev_cache.json", "models_dev_cache.etag", "provider_models_cache.json",
+                 ".skills_prompt_snapshot.json", "logs/agent.log", "cache/models/x.json", "image_cache/a.png",
+                 "audio_cache/a.mp3", "document_cache/a.pdf", "browser_screenshots/s.png", "checkpoints/c1/meta.json",
+                 "sandboxes/s1/run.txt", "source-checks/abc.json", "state-snapshots/2026-10-18/state.db",
+                 "backups/pre-update.zip", "runtime/active_sessions.json", "runtime/active_sessions.lock",
+                 "state/registry.json", "bin/lightpanda", "installs/x/y", "tools/t/z", "models/m.gguf", "runtimes/r",
+                 "node/n", "assets/a", "desktop/interrupted_turns.json", "desktop-plugins/p/plugin.js",
+                 "telemetry/shared_metrics/p.json", "cron/.tick.lock", "memories/MEMORY.md.lock",
+                 "bot-desktop/launcher.pid", "bot-desktop/env", "bot-desktop/lease.json", "bot-desktop/lease.lock",
+                 "bot-desktop/browser-profile/SingletonLock", "bot-desktop/browser-profile/DevToolsActivePort"]
+        for rel in files:
+            (d / rel).parent.mkdir(parents=True, exist_ok=True)
+            (d / rel).write_text("written by Hermes")
+        (d / "projects.db").unlink()
+        with closing(sqlite3.connect(d / "projects.db")) as db, db:  # Hermes makes the projects list on first open
+            db.execute("CREATE TABLE projects (id TEXT PRIMARY KEY, name TEXT)")
+        with closing(sqlite3.connect(d / "state.db")) as db, db:
+            db.execute("CREATE TABLE messages (id INTEGER PRIMARY KEY, role TEXT)")
+            db.execute("INSERT INTO messages(role) VALUES ('assistant')")
+
+    def test_a_bot_hermes_has_run_once_is_still_removable(self):
+        iid, d = self.made()
+        self.first_run(d)
+        self.assertEqual(installer.removal_preview("bot", iid)["will"], ["scout"])
+        self.assertEqual(installer.remove("bot", iid, True)["result"], "removed")
+
+    def test_the_owners_work_still_keeps_it_after_a_first_run(self):
+        cases = {"workspace/report.md": "Files have been added to it", "home/notes.txt": "Files have been added to it",
+                 "plans/launch.md": "Files have been added to it", "hooks/on-start/HOOK.yaml": "Files have been added to it",
+                 "plugins/mine/plugin.yaml": "Files have been added to it", "mcp-tokens/github.json": "Files have been added to it",
+                 "pairing/telegram.json": "Files have been added to it", "skins/mine.yaml": "Files have been added to it",
+                 ".hermes_history": "You have chatted with it", "auth.json": "Files have been added to it",
+                 "response_store.db": "Files have been added to it", "sessions/s1.json": "You have chatted with it",
+                 "memories/MEMORY.md": "It has saved memories", "skills/mine/SKILL.md": "Skills have been added or removed",
+                 "workspace/yarn.lock": "Files have been added to it", "bin2/tool": "Files have been added to it"}
+        for rel, why in cases.items():
+            with self.subTest(rel=rel):
+                wipe_profiles()
+                iid, d = self.made()
+                self.first_run(d)
+                (d / rel).parent.mkdir(parents=True, exist_ok=True)
+                (d / rel).write_text("mine")
+                self.assertIn(why, self.refused(iid, d))
+                self.delete.reset_mock()
+
+    def test_projects_the_owner_set_up_keep_it(self):
+        iid, d = self.made()
+        self.first_run(d)
+        with closing(sqlite3.connect(d / "projects.db")) as db, db:
+            db.execute("INSERT INTO projects VALUES ('p1', 'My launch')")
+        self.assertIn("It has projects you set up", self.refused(iid, d))
+
+    def test_a_projects_list_cabinet_cannot_read_keeps_it(self):
+        iid, d = self.made()
+        (d / "projects.db").write_text("not a database")
+        self.assertIn("Cabinet couldn't read its projects list", self.refused(iid, d))
+
+    def test_a_record_made_before_the_file_list_keeps_the_profile(self):
+        iid, d = self.made()
+        db = sqlite3.connect(Path(self._tmp.name) / "cabinet.db")
+        fp = json.loads(db.execute("SELECT fingerprint FROM installs WHERE id=?", (iid,)).fetchone()[0])
+        fp.pop("files")
+        db.execute("UPDATE installs SET fingerprint=? WHERE id=?", (json.dumps(fp), iid))
+        db.commit()
+        db.close()
+        reasons = self.refused(iid, d)
+        self.assertTrue(any("older Cabinet" in r for r in reasons), reasons)
+
+    def test_a_folder_cabinet_cannot_read_keeps_the_profile(self):
+        iid, d = self.made()
+        with mock.patch.object(installer.os, "walk", side_effect=PermissionError("denied")), \
+                mock.patch.object(Path, "iterdir", side_effect=PermissionError("denied")):
+            view = [v for v in installer.my_bots()["bots"] if v["id"] == iid][0]
+            self.assertFalse(view["canRemove"])
+            self.assertIn("Cabinet couldn't read all of its files", view["reasons"])
+            err = self.api_error(installer.remove, "bot", iid, True)
+        self.assertEqual(err.status_code, 409)
+        self.assertTrue(d.exists())
+
+    def test_too_many_files_keeps_the_profile(self):
+        iid, d = self.made()
+        with mock.patch.object(installer, "MAX_MANIFEST_FILES", 2):
+            self.assertIn("It has more files than Cabinet can check", self.refused(iid, d))
+
+    def test_a_crew_member_with_new_files_stays(self):
+        plan = installer.plan_crew("personal-planning-desk")
+        made = [m["profile"] for m in plan["members"] if m["mode"] == "create"]
+        for m in plan["members"]:
+            if m["mode"] == "create":
+                gateway_create(m["create"]["params"])
+        out = installer.confirm_crew(plan["planId"], made)
+        (self.root() / made[0] / "workspace" / "draft.md").write_text("mine")
+        result = installer.remove("crew", out["crew"]["id"], True)
+        self.assertEqual(result["kept"], [made[0]])
+        self.assertTrue((self.root() / made[0] / "workspace" / "draft.md").exists())
+
+
+class SmallerGuards(Base):
+    def test_without_a_birth_time_an_old_folder_with_one_new_file_is_not_new(self):
+        # Linux has no birth time, and a folder's own time moves whenever a file is added to it.
+        d = make_foreign_profile("older")
+        old = time.time() - 3600
+        for p in (d / "SOUL.md", d / "profile.yaml"):
+            os.utime(p, (old, old))
+        (d / "new.txt").write_text("just now")
+        with mock.patch.object(installer, "_birth_time", return_value=None):
+            self.assertFalse(installer._born_after(d, time.time() - 60))
+            fresh = self.root() / "fresh"
+            fresh.mkdir()
+            (fresh / "SOUL.md").write_text("x")
+            self.assertTrue(installer._born_after(fresh, time.time() - 60))
+
+    def test_remove_checks_again_that_hermes_bots_did_not_add_it(self):
+        _, out = self.add("scout")
+        iid, d = out["install"]["id"], self.root() / "scout"
+        with mock.patch.object(installer, "touched_reasons", return_value=[]), \
+                mock.patch.object(hermes, "hermes_catalog_name", return_value="scout"):
+            result = installer.remove("bot", iid, True)
+        self.assertEqual(result["result"], "kept")
+        self.delete.assert_not_called()
+        self.assertTrue(d.exists())
+        self.assertEqual(installer.store().get_install(iid)["status"], "released")
+
+    def test_an_unreadable_folder_on_an_old_record_is_a_reason_not_an_error(self):
+        _, out = self.add("scout")
+        d = self.root() / "scout"
+        old = {"soul": installer._sha(d / "SOUL.md"), "config": installer._sha(d / "config.yaml"), "skills": []}
+        with mock.patch.object(Path, "iterdir", side_effect=PermissionError("denied")):
+            reasons = installer.touched_reasons(d, old)
+        self.assertIn(installer.UNREADABLE, reasons)
+        self.assertIn(installer.OLD_RECORD, reasons)
+
+    def test_saving_instructions_never_follows_a_planted_link(self):
+        d = make_foreign_profile("target")
+        outside = Path(self._tmp.name) / "outside.txt"
+        outside.write_text("leave me alone")
+        try:
+            os.symlink(outside, d / f"SOUL.md.cabinet{os.getpid()}")
+        except (OSError, NotImplementedError):
+            self.skipTest("this system can't make links")
+        installer._write_atomic(d / "SOUL.md", "new instructions\n")
+        self.assertEqual(outside.read_text(), "leave me alone")
+        self.assertEqual((d / "SOUL.md").read_text(), "new instructions\n")
+        self.assertEqual(sorted(p.name for p in d.iterdir() if p.name.startswith("SOUL.md.") and not p.is_symlink()), [])
 
 
 class Removal(Base):
@@ -985,13 +1253,13 @@ class Kits(Base):
         self.assertEqual(installer.my_bots()["kits"], [])
 
     def test_bad_kits_are_refused_with_every_reason(self):
-        err = self.api_error(installer.save_kit, "!!", {**self.FIELDS, "firstRunTest": "key sk-abcdefghijklmnopqrstuvwxyz123456"}, "x")
+        err = self.api_error(installer.save_kit, "!!", {**self.FIELDS, "firstRunTest": "key " + FAKE_KEY}, "x")
         self.assertEqual(err.status_code, 422)
         self.assertGreaterEqual(len(err.detail["problems"]), 2)
         self.assertEqual(installer.store().kits(), [])
 
     def test_a_kit_with_a_secret_is_refused_and_the_message_does_not_repeat_it(self):
-        secret = "sk-abcdefghijklmnopqrstuvwxyz123456"
+        secret = FAKE_KEY
         err = self.api_error(installer.save_kit, "Lookout", {**self.FIELDS, "toolsIntegrations": f"use {secret}"}, "x")
         self.assertNotIn(secret, json.dumps(err.detail))
 

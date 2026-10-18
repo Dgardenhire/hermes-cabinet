@@ -12,9 +12,9 @@ The shape of every install, and why it is split in two:
                there, was made after the plan, and carries the planned instructions does Cabinet record it
                as its own, with a fingerprint of how it looked at that moment.
 
-Undo works from that fingerprint: Cabinet removes only a profile it recorded and only while the profile
-still looks the way Cabinet left it. Anything the owner has since edited, chatted in, given memories or
-scheduled stays, and Cabinet says why.
+Undo works from that fingerprint, a list of every file in the profile: Cabinet removes only a profile it
+recorded and only while every file still matches. Anything the owner has since added, removed, edited,
+chatted in, given memories or scheduled stays, and Cabinet says why.
 
 Cabinet never writes into, renames or deletes a profile it didn't create. A name that's already taken is
 refused with a free suggestion.
@@ -28,6 +28,8 @@ import json
 import os
 import re
 import sqlite3
+import stat
+import tempfile
 import time
 from contextlib import closing
 from pathlib import Path
@@ -233,7 +235,123 @@ def plan_lab(*, display: str, description: str, soul: str, profile: str | None, 
 
 # ------------------------------------------------------------------ recording what Hermes made --
 
+# What Hermes itself writes into a profile as it runs: caches, locks, snapshots, runtime state, downloaded tools and
+# models. None of it is the owner's work, so it may come and go without keeping a profile from being removed.
+#
+# Source: Hermes 0.22.2 (hermes-agent d923a5eb48). hermes_cli/profiles.py DEFAULT_EXPORT_EXCLUDE_ROOT ("infrastructure
+# / runtime state that is not profile data") and _CLONE_ALL_STRIP, hermes_cli/home_data_layout.py PM_RUNTIME_ROOT_DIRS,
+# hermes_constants.py LOCAL_RUNTIME_ROOT_DIRS, plus the files Hermes's own code writes on first use:
+# agent/model_metadata.py (context_length_cache.yaml), agent/models_dev.py (models_dev_cache.*), hermes_cli/models.py
+# (provider_models_cache.json), agent/prompt_builder.py (.skills_prompt_snapshot.json), hermes_cli/config.py (.env.lock),
+# hermes_cli/backup.py (.backup.lock, backups/, state-snapshots/), hermes_cli/active_sessions.py (runtime/),
+# tui_gateway (state/, desktop/), Electron (desktop-plugins/, copies of installed plugins), cron's .tick.lock and the
+# memory tool's *.lock. Copied here, not imported: a plugin may not import Hermes's private modules.
+#
+# Kept short on purpose. Anything not named counts as the owner's: SOUL.md, config.yaml, .env and auth.json (by size
+# and time), profile.yaml, memories, skills, sessions, .hermes_history, workspace, home, plans, cron jobs, hooks,
+# plugins, mcp-tokens (services the owner connected), pairing and platforms (channels the owner paired), skins,
+# response_store.db, and every unknown name. Two stores Hermes makes on first open are checked by what they hold:
+# state.db (any message the owner sent) and projects.db (any project the owner set up).
+_RUNTIME_FILES = frozenset({
+    "state.db", "state.db-wal", "state.db-shm", "state.db-journal",
+    "projects.db", "projects.db-wal", "projects.db-shm", "projects.db-journal",
+    "gateway.pid", "gateway.lock", "gateway_state.json", "processes.json", "active_profile",
+    "auth.lock", ".env.lock", ".backup.lock", ".update_check", "errors.log",
+    "context_length_cache.yaml", "models_dev_cache.json", "models_dev_cache.etag", "provider_models_cache.json",
+    ".skills_prompt_snapshot.json",
+})
+_RUNTIME_DIRS = frozenset({
+    "logs", "cache", "image_cache", "audio_cache", "document_cache", "browser_screenshots", "checkpoints", "sandboxes",
+    "source-checks", "state-snapshots", "backups", "runtime", "state", "telemetry", "desktop", "desktop-plugins",
+    "bin", "installs", "tools", "models", "runtimes", "node", "assets",
+})
+_RUNTIME_PATHS = frozenset({
+    "cron/.tick.lock",
+    "bot-desktop/launcher.pid", "bot-desktop/env", "bot-desktop/rfb.sock", "bot-desktop/lease.json", "bot-desktop/lease.lock",
+    "bot-desktop/browser-profile/DevToolsActivePort", "bot-desktop/browser-profile/SingletonLock",
+    "bot-desktop/browser-profile/SingletonCookie", "bot-desktop/browser-profile/SingletonSocket",
+})
+MAX_MANIFEST_FILES = 5000  # more than this and Cabinet won't vouch for the folder; the profile stays
+_HASH_LIMIT = 8 * 1024 * 1024  # files bigger than this are compared by size and time, not read
+_NEVER_HASHED = frozenset({".env", "auth.json"})  # credentials: compared by size and time, so no hash of a key is kept
+
+OLD_RECORD = "An older Cabinet made it and kept no list of its files, so Cabinet can't tell what you added"
+UNREADABLE = "Cabinet couldn't read all of its files"
+TOO_MANY = "It has more files than Cabinet can check"
+NO_HISTORY = "Cabinet couldn't read its chat history"
+
+
+class _TooMany(Exception):
+    pass
+
+
+def _runtime(rel: str) -> bool:
+    top, _, rest = rel.partition("/")
+    if top in _RUNTIME_DIRS or rel in _RUNTIME_PATHS or (not rest and top in _RUNTIME_FILES):
+        return True
+    return top == "memories" and "/" not in rest and rest.endswith(".lock")  # the memory tool's write lock
+
+
+def _scan(directory: Path) -> dict[str, os.stat_result]:
+    """Every file and link in the profile, by its path inside it, except Hermes's own runtime files.
+
+    Links are listed, never followed. Empty folders are left out: they hold nothing to lose. Raises OSError when
+    any part can't be read, and _TooMany past MAX_MANIFEST_FILES.
+    """
+    found: dict[str, os.stat_result] = {}
+
+    def fail(exc: OSError) -> None:
+        raise exc
+
+    for top, dirs, files in os.walk(directory, onerror=fail, followlinks=False):
+        here = Path(top)
+        prefix = here.relative_to(directory).as_posix()
+        prefix = "" if prefix == "." else prefix + "/"
+        walk_into = []
+        for name in dirs:
+            sub_dir = here / name
+            if sub_dir.is_symlink() or getattr(sub_dir, "is_junction", lambda: False)():
+                files.append(name)  # a link to a folder is a file here: recorded, not walked into
+            elif not _runtime(prefix + name):
+                walk_into.append(name)
+        dirs[:] = walk_into
+        for name in files:
+            rel = prefix + name
+            if _runtime(rel):
+                continue
+            found[rel] = os.lstat(here / name)
+            if len(found) > MAX_MANIFEST_FILES:
+                raise _TooMany()
+    return found
+
+
+def _digest(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def _entry(path: Path, st: os.stat_result) -> list[Any]:
+    """How one file looked: ["link", target], ["file", size, mtime_ns, sha256 or ""] or ["other"]. Never its contents."""
+    if stat.S_ISLNK(st.st_mode) or getattr(path, "is_junction", lambda: False)():
+        return ["link", os.readlink(path)]
+    if not stat.S_ISREG(st.st_mode):
+        return ["other"]
+    hashed = st.st_size <= _HASH_LIMIT and path.name not in _NEVER_HASHED
+    return ["file", st.st_size, st.st_mtime_ns, _digest(path) if hashed else ""]
+
+
+def manifest(directory: Path) -> dict[str, list[Any]]:
+    return {rel: _entry(directory / rel, st) for rel, st in sorted(_scan(directory).items())}
+
+
 def fingerprint(directory: Path) -> dict[str, Any]:
+    """How the profile looked the moment Cabinet recorded it: every file (``files``), plus the old summary fields.
+
+    ``files`` is None when the folder couldn't be listed then; such a profile is never removed automatically.
+    """
     skills: list[str] = []
     root = directory / "skills"
     if root.is_dir():
@@ -242,59 +360,193 @@ def fingerprint(directory: Path) -> dict[str, Any]:
                 skills.append(str(p.relative_to(root)))
             if len(skills) >= 2000:
                 break
-    return {"soul": _sha(directory / "SOUL.md"), "config": _sha(directory / "config.yaml"), "skills": skills}
-
-
-def _user_messages(directory: Path) -> int:
-    db_path = directory / "state.db"
-    if not db_path.is_file():
-        return 0
     try:
-        with closing(sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=2)) as db:
-            row = db.execute("SELECT COUNT(*) FROM messages WHERE role='user'").fetchone()
-        return int(row[0] or 0)
-    except sqlite3.Error:
-        return 0
+        files: dict[str, list[Any]] | None = manifest(directory)
+    except (OSError, _TooMany):
+        files = None
+    return {"soul": _sha(directory / "SOUL.md"), "config": _sha(directory / "config.yaml"), "skills": skills, "files": files}
 
 
-def touched_reasons(directory: Path, fp: dict[str, Any]) -> list[str]:
-    """Why this profile is no longer exactly what Cabinet made. Empty means untouched."""
+def _same(path: Path, st: os.stat_result, was: list[Any]) -> bool:
+    if not isinstance(was, list) or not was:
+        return False
+    if was[0] == "link":
+        return (stat.S_ISLNK(st.st_mode) or getattr(path, "is_junction", lambda: False)()) and os.readlink(path) == was[1]
+    if was[0] != "file" or not stat.S_ISREG(st.st_mode) or len(was) < 4 or st.st_size != was[1]:
+        return False
+    if was[3]:
+        return _digest(path) == was[3]  # read again: same size and time is not proof enough
+    return st.st_mtime_ns == was[2]
+
+
+def _jobs_reason(path: Path) -> str | None:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "It has a scheduled jobs file Cabinet can't read"
+    return "It has scheduled jobs" if (data.get("jobs") if isinstance(data, dict) else data) else None
+
+
+def _file_reason(directory: Path, rel: str, how: str) -> str | None:
+    """The plain reason one added, removed or changed file keeps the profile."""
+    top = rel.split("/", 1)[0]
+    if rel == "SOUL.md":
+        return "Its instructions have been edited"
+    if rel == "config.yaml":
+        return "Its settings (model, tools or skills) have been changed"
+    if rel == ".env":
+        return "Its keys file (.env) has been changed"
+    if rel == "profile.yaml":
+        return "Its name or description has been changed"
+    if top == "skills":
+        return "Skills have been added or removed"
+    if top == "memories":
+        return "It has saved memories"
+    if top == "sessions" or rel == ".hermes_history":
+        return "You have chatted with it"
+    if rel == "cron/jobs.json" and how != "removed":
+        return _jobs_reason(directory / rel)  # Hermes may write an empty jobs file on its own
+    if top == "cron":
+        return "It has scheduled jobs"
+    return {"added": "Files have been added to it", "removed": "Files have been removed from it"}.get(how, "Files in it have been changed")
+
+
+def _manifest_reasons(directory: Path, files: dict[str, Any]) -> list[str]:
+    try:
+        now = _scan(directory)
+        out = []
+        for rel in sorted(set(now) | set(files)):
+            if rel not in files:
+                out.append(_file_reason(directory, rel, "added"))
+            elif rel not in now:
+                out.append(_file_reason(directory, rel, "removed"))
+            elif not _same(directory / rel, now[rel], files[rel]):
+                out.append(_file_reason(directory, rel, "changed"))
+        return [r for r in out if r]
+    except _TooMany:
+        return [TOO_MANY]
+    except OSError:
+        return [UNREADABLE]
+
+
+def _legacy_reasons(directory: Path, fp: dict[str, Any]) -> list[str]:
+    """The checks a record made before 0.3.11 can still support. They are never enough on their own to remove it."""
     reasons: list[str] = []
     if _sha(directory / "SOUL.md") != fp.get("soul"):
         reasons.append("Its instructions have been edited")
     if _sha(directory / "config.yaml") != fp.get("config"):
         reasons.append("Its settings (model, tools or skills) have been changed")
-    if fingerprint(directory)["skills"] != fp.get("skills"):
-        reasons.append("Skills have been added or removed")
-    memories = directory / "memories"
-    if memories.is_dir() and any(not p.name.startswith(".") for p in memories.iterdir()):
-        reasons.append("It has saved memories")
+    try:
+        if fingerprint(directory)["skills"] != fp.get("skills"):
+            reasons.append("Skills have been added or removed")
+        for folder, why in (("memories", "It has saved memories"), ("sessions", "You have chatted with it")):
+            if (directory / folder).is_dir() and any(True for _ in (directory / folder).iterdir()):
+                reasons.append(why)
+    except OSError:
+        reasons.append(UNREADABLE)
     jobs = directory / "cron" / "jobs.json"
     if jobs.is_file():
-        try:
-            data = json.loads(jobs.read_text(encoding="utf-8"))
-            if (data.get("jobs") if isinstance(data, dict) else data):
-                reasons.append("It has scheduled jobs")
-        except (OSError, ValueError):
-            reasons.append("It has a scheduled jobs file Cabinet can't read")
-    sessions = directory / "sessions"
-    if (sessions.is_dir() and any(not p.name.startswith(".") for p in sessions.iterdir())) or _user_messages(directory):
-        reasons.append("You have chatted with it")
+        why = _jobs_reason(jobs)
+        if why:
+            reasons.append(why)
     return reasons
 
 
+def _rows(db_path: Path, table: str, where: str = "") -> int | None:
+    """Rows in one table of a SQLite file, opened read only. 0 when the file or table isn't there; None when unreadable.
+
+    The file: address comes from ``as_uri()``, which escapes '#', '?', '%' and spaces and writes Windows paths as
+    file:///C:/..., so any folder name opens the right file.
+    """
+    if not db_path.exists() and not db_path.is_symlink():
+        return 0
+    try:
+        uri = db_path.absolute().as_uri() + "?mode=ro"
+        with closing(sqlite3.connect(uri, uri=True, timeout=2)) as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
+                return 0  # Hermes made the file but nothing is in it yet
+            row = db.execute(f"SELECT COUNT(*) FROM {table}{' WHERE ' + where if where else ''}").fetchone()
+        return int(row[0] or 0)
+    except (sqlite3.Error, ValueError, OSError):
+        return None
+
+
+def _user_messages(directory: Path) -> int | None:
+    """How many messages the owner has sent in this profile's chat store. 0 when none; None when Cabinet can't tell."""
+    return _rows(directory / "state.db", "messages", "role='user'")
+
+
+def touched_reasons(directory: Path, fp: dict[str, Any]) -> list[str]:
+    """Why this profile is no longer exactly what Cabinet made. Empty means untouched, and only then may it be removed.
+
+    Every file counts: anything added, removed or changed since Cabinet recorded the profile keeps it, except the
+    runtime files Hermes writes on its own (``_RUNTIME_FILES``, ``_RUNTIME_DIRS``, ``_RUNTIME_PATHS``). A record with no file list keeps it too.
+    """
+    files = fp.get("files") if isinstance(fp, dict) else None
+    if isinstance(files, dict):
+        reasons = _manifest_reasons(directory, files)
+    else:
+        reasons = _legacy_reasons(directory, fp if isinstance(fp, dict) else {}) + [OLD_RECORD]
+    said = _user_messages(directory)
+    if said is None:
+        reasons.append(NO_HISTORY)
+    elif said:
+        reasons.append("You have chatted with it")
+    projects = _rows(directory / "projects.db", "projects")
+    if projects is None:
+        reasons.append("Cabinet couldn't read its projects list")
+    elif projects:
+        reasons.append("It has projects you set up")
+    return list(dict.fromkeys(reasons))
+
+
 def _write_atomic(path: Path, text: str) -> None:
-    tmp = path.with_name(path.name + f".cabinet{os.getpid()}")
-    tmp.write_text(text, encoding="utf-8")
-    os.replace(tmp, path)
+    """Write through a fresh temporary file in the same folder, then swap it in.
+
+    ``mkstemp`` makes a new file with a name nobody could guess and never opens one that is already there, so a link
+    planted next to SOUL.md can't redirect the write. ``os.replace`` swaps the file itself, never a link's target.
+    """
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".cabinet")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        try:
+            os.chmod(tmp, stat.S_IMODE(os.stat(path).st_mode))  # keep the old file's permissions, not mkstemp's 0600
+        except OSError:
+            pass
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _birth_time(st: os.stat_result) -> float | None:
+    """When the folder was made, where the system records it: macOS and BSD (st_birthtime), Windows (st_ctime)."""
+    born = getattr(st, "st_birthtime", None)
+    if born:
+        return born
+    return st.st_ctime if os.name == "nt" else None
 
 
 def _born_after(directory: Path, planned_at: float) -> bool:
+    """Was this folder made after the plan? Without a birth time (Linux) the folder's own time won't do: it moves each
+    time a file is added. The oldest time on the folder or anything directly in it stands in instead, because a
+    profile that was there before the plan still holds older files."""
     try:
         st = directory.stat()
+        born = _birth_time(st)
+        if born is None:
+            times = [st.st_mtime]
+            for n, entry in enumerate(directory.iterdir()):
+                if n >= 2000:
+                    break
+                times.append(entry.lstat().st_mtime)
+            born = min(times)
     except OSError:
         return False
-    born = getattr(st, "st_birthtime", None) or st.st_mtime
     return born >= planned_at - PLAN_SLACK_SECONDS
 
 
@@ -376,10 +628,13 @@ def confirm(plan_id: str, *, created: bool = True) -> dict[str, Any]:
     if not plan or plan["kind"] not in ("bot", "lab"):
         raise _bad(404, "That plan isn't known any more. Open the review screen again.")
     if plan["status"] == "done":
+        # A second confirm is only ever an answer about the first. A done plan is never recorded again: the profile of
+        # that name may since have been deleted and made again by the owner, and recording would rewrite its SOUL.md.
         existing = st.active_install_for(plan["payload"]["profile"])
         if existing:
             return {"ok": True, "already": True, "install": _install_view(existing)}
-    if plan["status"] not in ("pending", "done"):
+        raise _bad(409, "That plan was already used, and Cabinet no longer tracks what it made. Open the review screen again.")
+    if plan["status"] != "pending":
         raise _bad(410, "That plan has expired. Open the review screen again.")
     done = _record(plan, made_by_cabinet=bool(created))
     st.set_plan_status(plan_id, "done")
@@ -881,7 +1136,7 @@ def _delete_untouched(st: Store, inst: dict[str, Any]) -> str:
     if not directory.exists():
         st.mark_install_removed(inst["id"])
         return "forgotten"
-    if touched_reasons(directory, inst["fingerprint"]):
+    if touched_reasons(directory, inst["fingerprint"]) or _hermes_bots_refusal(inst["profile"], directory) is not None:
         st.release_install(inst["id"])
         return "kept"
     # The recorded path must still be the profile folder Hermes would use for this name.

@@ -8,7 +8,7 @@ Hermes Desktop plugin
 
 Tell Cabinet a job you need done. It suggests the simplest setup that can do it, then helps you add a Bot, plan your own, or set up a crew.
 
-- **Version:** 0.3.10
+- **Version:** 0.3.11
 - **Needs:** Hermes 0.22.0 or later
 - **License:** MIT
 - **Source:** [GitHub](https://github.com/Dgardenhire/hermes-cabinet)
@@ -272,14 +272,14 @@ Every bot hears the conversation, and you can @mention one by name. A group chat
 My Bots lists everything Cabinet made for you: Bots, crews and saved plans. From here you can chat with them or remove them.
 
 1. **Made by Cabinet, not changed yet** means the bot is just as Cabinet made it. You can remove it.
-2. **You've changed it since Cabinet made it** means you edited it, so it's yours now and Cabinet leaves it alone. **Why it stays** shows what changed. You can still delete it in Hermes.
+2. **You've changed it since Cabinet made it** means something in it is different: you edited it, chatted with it, or added, changed or removed a file in its folder. It's yours now and Cabinet leaves it alone. **Why it stays** shows what changed. You can still delete it in Hermes.
 3. **To remove a bot,** press **Remove**, check the list, and press **Remove it**. **Keep it** backs out.
 4. **Removing a crew** removes the bots Cabinet made for it and archives its Kanban cards. A bot of yours that the crew used stays.
 5. **Saved kits** are plans from Bot Lab. Press **Make a bot from it** when you're ready.
 
 > <kbd>Your other bots are safe</kbd>
 >
-> Cabinet only removes bots it made that you haven't changed. A full history of what it has done is at the bottom of the page.
+> Cabinet only removes bots it made that you haven't changed. It checks every file in the bot's folder first, so your work files and notes are never deleted. A bot made by Cabinet 0.3.10 or older stays, because that version didn't keep a list of its files. A full history of what it has done is at the bottom of the page.
 
 ![My Bots: Daily Newspaper with a Remove confirmation, Scout marked as changed, a crew, and a saved kit](manual/mybots.jpg)
 

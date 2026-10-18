@@ -507,8 +507,8 @@ function StaleLine() {
   const s = c.status
   const label = s ? s.label : `Showing the saved copy from ${shortDate(SNAPSHOT).replace(/, \d+$/, '')}`
   const live = Boolean(s && s.source === 'live')
-  // Only a real problem gets a note. The site not publishing its catalog yet is the expected state, and how the
-  // copy got here is nothing the reader needs, so the line just says how fresh the Bots are.
+  // Only a real problem gets a note (the backend marks it tone 'warn', a missing catalog file included). How the
+  // copy got here is nothing the reader needs, so otherwise the line just says how fresh the Bots are.
   const warn = Boolean(s && s.tone === 'warn')
   const note = warn ? s.note || s.error || '' : ''
   return jsxs('p', { className: 'bc-source hk-small', role: 'status', 'aria-live': 'polite', 'data-tone': warn ? 'warn' : undefined, children: [

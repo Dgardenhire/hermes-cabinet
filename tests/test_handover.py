@@ -141,6 +141,37 @@ class Markers(Sandbox):
         self.assertEqual(hermes.hermes_catalog_installs(), {"research-analyst": "analyst", "scout": "scout"})
 
 
+    def test_flow_style_provenance_counts(self):
+        for text in ("provenance: {kind: bot-catalog, catalog_name: scout}\n",
+                     "provenance: {catalog_name: 'scout', kind: \"bot-catalog\"}  # Hermes wrote this\n"):
+            d = make_foreign_profile("flowbot")
+            (d / "profile.yaml").write_text(text)
+            self.assertEqual(hermes.hermes_catalog_name(d), "scout", text)
+            wipe_profiles()
+
+    def test_a_catalog_marker_cabinet_cannot_parse_still_counts(self):
+        d = make_foreign_profile("oddbot")
+        (d / "profile.yaml").write_text("provenance:\n    # spaced out\n    kind:   'bot-catalog'\n")
+        self.assertIsNotNone(hermes.hermes_catalog_name(d))
+
+    def test_a_profile_file_cabinet_cannot_read_counts_as_hermes_bots(self):
+        d = make_foreign_profile("locked")
+        with mock.patch.object(type(d), "read_text", side_effect=PermissionError("denied")):
+            self.assertEqual(hermes.hermes_catalog_name(d), "")
+
+    def test_an_error_while_looking_counts_as_hermes_bots(self):
+        d = make_foreign_profile("broken")
+        with mock.patch.object(hermes, "_shallow_text", side_effect=RuntimeError("boom")):
+            self.assertEqual(hermes.hermes_catalog_name(d), "")
+
+    def test_every_profile_is_looked_at_however_many_there_are(self):
+        root = hermes.profiles_root()
+        for i in range(520):
+            (root / f"a{i:03d}").mkdir()
+        hermes_bots_install("scout", "zz-scout")
+        self.assertEqual(hermes.hermes_catalog_installs(), {"scout": "zz-scout"})
+
+
 class DuplicateGuard(Sandbox):
     def test_my_bots_lists_cabinet_bots_hermes_bots_already_added(self):
         hermes_bots_install("scout", "scout-hermes")

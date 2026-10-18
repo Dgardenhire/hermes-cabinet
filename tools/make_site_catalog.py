@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Emit the file botcabinet.com should publish at /catalog.json, from this plugin's catalog snapshot.
 
-    /usr/bin/python3 tools/make_site_catalog.py                       # writes ./site-catalog/catalog.json
-    /usr/bin/python3 tools/make_site_catalog.py --out public/catalog.json
-    /usr/bin/python3 tools/make_site_catalog.py --check path/to/catalog.json   # check any file, change nothing
+    python3 tools/make_site_catalog.py                       # writes ./site-catalog/catalog.json
+    python3 tools/make_site_catalog.py --out public/catalog.json
+    python3 tools/make_site_catalog.py --check path/to/catalog.json   # check any file, change nothing
 
 The output is data/catalog.json (the snapshot ``tools/make_catalog.py`` takes from the site itself) run
 through the same strict checker Cabinet applies to what it fetches (``catalog_schema.validate_catalog``).

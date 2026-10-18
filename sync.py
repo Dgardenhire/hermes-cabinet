@@ -26,6 +26,7 @@ import json
 import os
 import socket
 import ssl
+import tempfile
 import threading
 import urllib.error
 import urllib.request
@@ -41,11 +42,9 @@ TIMEOUT = 4.0
 MAX_BYTES = 2_000_000
 MAX_REDIRECTS = 3
 CACHE_NAME = "catalog-cache.json"
-USER_AGENT = "bot-cabinet-v2-hermes-plugin/0.3"
-# botcabinet.com does not publish catalog.json yet (docs/site-catalog-contract.md). That is the expected state,
-# not a fault, so the page says it calmly instead of showing it as an error.
-NOT_PUBLISHED = "botcabinet.com hasn't published its catalog file yet"
-CALM_NOTE = "botcabinet.com doesn't publish a live catalog yet. Cabinet checks again each time you open it."
+USER_AGENT = "bot-cabinet-v2-hermes-plugin/0.3.11"
+# botcabinet.com publishes catalog.json (docs/site-catalog-contract.md), so a 404 is a fault like any other.
+NOT_FOUND = "Cabinet couldn't find botcabinet.com's catalog file"
 
 _MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 _LOCK = threading.Lock()
@@ -102,7 +101,7 @@ def fetch(open_fn: Callable[[str, float], Any] | None = None, url: str = URL, ti
         raise
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
-            raise SyncError(NOT_PUBLISHED) from exc
+            raise SyncError(NOT_FOUND) from exc
         raise SyncError(f"botcabinet.com answered with an error ({exc.code})") from exc
     except (urllib.error.URLError, socket.timeout, TimeoutError, ssl.SSLError, OSError) as exc:
         raise SyncError("Cabinet couldn't reach botcabinet.com") from exc
@@ -153,11 +152,20 @@ def read_cache(data: Path | None = None) -> dict[str, Any] | None:
 
 
 def write_cache(doc: dict[str, Any], fetched_at: str, data: Path | None = None) -> None:
+    """Save the copy through a fresh temporary file (``mkstemp``: an unguessable name, never an existing file or link)."""
     path = cache_path(data)
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + f".tmp{os.getpid()}")
-    tmp.write_text(json.dumps({"fetchedAt": fetched_at, "doc": doc}, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, path)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"fetchedAt": fetched_at, "doc": doc}, ensure_ascii=False))
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 # ------------------------------------------------------------------- state --
@@ -186,11 +194,9 @@ def status() -> dict[str, Any]:
         label = f"Showing the saved copy from {when}"
     doc = catalog.load()
     error = _STATE["error"]
-    # What the page shows beside the label. The site not publishing yet is expected, so it reads as a calm note.
+    # What the page shows beside the label: nothing to worry about, or what went wrong and that the copy was kept.
     if not error:
         note, tone = ("The catalog that came with Cabinet." if source == "bundled" else None), "calm"
-    elif error == NOT_PUBLISHED:
-        note, tone = CALM_NOTE, "calm"
     else:
         note, tone = f"{error}. Cabinet kept the copy it had.", "warn"
     return {"source": source, "label": label, "updatedAt": _STATE["updatedAt"], "checkedAt": _STATE["checkedAt"],
@@ -198,16 +204,26 @@ def status() -> dict[str, Any]:
             "siteCommit": doc["siteCommit"]}
 
 
+def _best_saved(cached: dict[str, Any] | None) -> tuple[str, dict[str, Any]]:
+    """The newer of the last good fetched copy and the bundled snapshot, as (source, doc).
+
+    A plugin update can ship a snapshot fresher than an old saved copy; then the snapshot wins.
+    """
+    if cached and cached["doc"]["generatedAt"] >= catalog.bundled()["generatedAt"]:
+        return "cache", cached["doc"]
+    return "bundled", catalog.bundled()
+
+
+def _use_saved(cached: dict[str, Any] | None, error: str | None, checked_at: str | None = None) -> None:
+    source, doc = _best_saved(cached)
+    catalog.set_active(doc if source == "cache" else None)
+    _set(source, doc, error, checked_at)
+
+
 def activate_best(data: Path | None = None) -> dict[str, Any]:
-    """Startup: use the last good fetched copy if there is one, otherwise the bundled snapshot."""
+    """Startup: use the newer of the last good fetched copy and the bundled snapshot."""
     with _LOCK:
-        cached = read_cache(data)
-        if cached:
-            catalog.set_active(cached["doc"])
-            _set("cache", cached["doc"], None)
-        else:
-            catalog.set_active(None)
-            _set("bundled", catalog.bundled(), None)
+        _use_saved(read_cache(data), None)
     return status()
 
 
@@ -219,7 +235,7 @@ def refresh(data: Path | None = None, open_fn: Callable[[str, float], Any] | Non
         cached = read_cache(data)
         try:
             doc = fetch(open_fn)
-            held = cached["doc"] if cached else catalog.bundled()
+            held = _best_saved(cached)[1]
             if doc["generatedAt"] < held["generatedAt"]:
                 raise SyncError("botcabinet.com's catalog is older than the copy Cabinet already has")
             # A date in the future would freeze every later catalog out, so it is refused.
@@ -230,12 +246,7 @@ def refresh(data: Path | None = None, open_fn: Callable[[str, float], Any] | Non
             _set("live", doc, None, stamp)
         except SyncError as exc:
             _STATE["checkedAt"] = stamp
-            if cached:
-                catalog.set_active(cached["doc"])
-                _set("cache", cached["doc"], str(exc), stamp)
-            else:
-                catalog.set_active(None)
-                _set("bundled", catalog.bundled(), str(exc), stamp)
+            _use_saved(cached, str(exc), stamp)
         except OSError as exc:  # the data folder couldn't be written: use the fresh copy this run anyway
             catalog.set_active(doc)
             _set("live", doc, f"Cabinet couldn't save the copy ({exc.__class__.__name__})", stamp)

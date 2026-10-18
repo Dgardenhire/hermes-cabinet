@@ -68,6 +68,17 @@ class Where(unittest.TestCase):
         self.assertNotEqual(Path.home().resolve(), REAL_HOME.resolve())
 
 
+class RunnerImports(unittest.TestCase):
+    def test_the_runner_loads_without_pwd_as_on_windows(self):
+        import importlib.util
+        import sys
+        spec = importlib.util.spec_from_file_location("cabinet_runner_check", Path(__file__).resolve().parent / "run_with_hermes.py")
+        mod = importlib.util.module_from_spec(spec)
+        with mock.patch.dict(sys.modules, {"pwd": None}):  # None makes "import pwd" fail, as it does on Windows
+            spec.loader.exec_module(mod)
+            self.assertTrue(str(mod.real_home()))
+
+
 class RealHermesStaysPut(unittest.TestCase):
     def test_a_full_add_set_up_and_remove_changes_nothing_real(self):
         before = real_state()

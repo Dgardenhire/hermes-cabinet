@@ -196,7 +196,7 @@ def archive_cards(card_ids: list[str]) -> int:
 # ``detect_core_catalog`` is the Python side's view of the same thing, for callers that have no gateway.
 
 BLUEPRINT_FILE = "bot-blueprint.yaml"
-_MAX_PROFILES_SCANNED = 500
+_CATALOG_KIND = re.compile(r"""\bkind\s*:\s*['"]?bot-catalog\b""")
 
 
 def detect_core_catalog() -> dict[str, Any]:
@@ -228,15 +228,29 @@ def _scalar(text: str) -> str:
     return text.strip()
 
 
-def _shallow_yaml(path: Path) -> dict[str, Any]:
-    """The top-level keys of a small YAML file, and the plain values directly under each. Never raises.
+def _flow_map(text: str) -> dict[str, str] | None:
+    """A one-line flow mapping, ``{kind: bot-catalog, catalog_name: scout}``, as plain key/value text. None if it isn't one."""
+    text = text.split(" #", 1)[0].strip()
+    if not (text.startswith("{") and text.endswith("}")):
+        return None
+    out: dict[str, str] = {}
+    for part in text[1:-1].split(","):
+        key, sep, value = part.partition(":")
+        if sep and key.strip():
+            out[_scalar(key)] = _scalar(value)
+    return out
 
-    Enough to read the two markers Hermes's catalog writes, without depending on a YAML library being importable.
+
+def _shallow_yaml(path: Path) -> dict[str, Any]:
+    """The top-level keys of a small YAML file, and the plain values directly under each. Raises OSError if unreadable.
+
+    Enough to read the two markers Hermes's catalog writes, block style or one-line flow style, without depending
+    on a YAML library being importable.
     """
-    try:
-        text = path.read_text(encoding="utf-8", errors="replace")[:200_000]
-    except OSError:
-        return {}
+    return _shallow_text(path.read_text(encoding="utf-8", errors="replace")[:200_000])
+
+
+def _shallow_text(text: str) -> dict[str, Any]:
     out: dict[str, Any] = {}
     parent: str | None = None
     child_indent: int | None = None
@@ -250,7 +264,8 @@ def _shallow_yaml(path: Path) -> dict[str, Any]:
         indent, key, value = len(match.group(1)), match.group(2), _scalar(match.group(3) or "")
         if indent == 0:
             parent, child_indent = key, None
-            out[key] = value if value else {}
+            flow = _flow_map(match.group(3) or "")
+            out[key] = flow if flow is not None else (value if value else {})
         elif parent is not None and isinstance(out.get(parent), dict):
             if child_indent is None:
                 child_indent = indent
@@ -263,28 +278,45 @@ def hermes_catalog_name(directory: Path) -> str | None:
     """The Hermes Bots catalog name this profile was added from, or None when Hermes's catalog didn't add it.
 
     Any ``bot-blueprint.yaml`` marks a catalog profile; so does ``profile.yaml`` saying ``kind: bot-catalog`` (under
-    ``provenance``, where Hermes writes it, or at the top). Returns "" for a catalog profile whose name can't be read.
+    ``provenance``, where Hermes writes it, or at the top, block or flow style). Returns "" for a catalog profile whose
+    name can't be read. Fails closed: a ``profile.yaml`` Cabinet can't read, a ``kind: bot-catalog`` it can't place, or
+    any error while looking all count as Hermes Bots, so Cabinet leaves the profile alone.
     """
-    blueprint = directory / BLUEPRINT_FILE
-    if blueprint.exists() or blueprint.is_symlink():
-        entry = _shallow_yaml(blueprint).get("catalog_entry")
-        name = entry.get("name") if isinstance(entry, dict) else None
-        return str(name or "")
-    meta = _shallow_yaml(directory / "profile.yaml")
-    provenance = meta.get("provenance")
-    if isinstance(provenance, dict) and provenance.get("kind") == "bot-catalog":
-        return str(provenance.get("catalog_name") or "")
-    if meta.get("kind") == "bot-catalog":
-        return str(meta.get("catalog_name") or meta.get("name") or "")
-    return None
+    try:
+        blueprint = directory / BLUEPRINT_FILE
+        if blueprint.exists() or blueprint.is_symlink():
+            try:
+                entry = _shallow_yaml(blueprint).get("catalog_entry")
+            except OSError:
+                return ""
+            name = entry.get("name") if isinstance(entry, dict) else None
+            return str(name or "")
+        meta_file = directory / "profile.yaml"
+        if not meta_file.exists() and not meta_file.is_symlink():
+            return None
+        text = meta_file.read_text(encoding="utf-8", errors="replace")[:200_000]
+        meta = _shallow_text(text)
+        provenance = meta.get("provenance")
+        if isinstance(provenance, dict) and provenance.get("kind") == "bot-catalog":
+            return str(provenance.get("catalog_name") or "")
+        if meta.get("kind") == "bot-catalog":
+            return str(meta.get("catalog_name") or meta.get("name") or "")
+        if _CATALOG_KIND.search(text):
+            return ""  # says it came from the catalog in a shape Cabinet doesn't read
+        return None
+    except Exception:
+        return ""
 
 
 def hermes_catalog_installs() -> dict[str, str]:
-    """Catalog name to profile, for every profile Hermes's own Bots catalog added. Read only."""
+    """Catalog name to profile, for every profile Hermes's own Bots catalog added. Read only.
+
+    Every profile is looked at, however many there are: a cap would quietly miss the ones past it.
+    """
     found: dict[str, str] = {}
     root = profiles_root()
     try:
-        entries = sorted(root.iterdir())[:_MAX_PROFILES_SCANNED]
+        entries = sorted(root.iterdir())
     except OSError:
         return found
     for entry in entries:

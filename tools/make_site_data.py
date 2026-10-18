@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build Cabinet's picture of botcabinet.com: data/site.json and desktop/src/site-data.js.
 
-    /usr/bin/python3 tools/make_site_data.py <path-to-bot-cabinet-site> [--ref <git ref>]
+    python3 tools/make_site_data.py <path-to-bot-cabinet-site> [--ref <git ref>]
 
 Reads the site repository READ ONLY, at one git ref (default: the newest commit on any branch), with
 `git show`, so the working tree there is never touched. Nothing is downloaded.

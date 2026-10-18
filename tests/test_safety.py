@@ -11,6 +11,8 @@ from _load import sub
 safety = sub("safety")
 catalog = sub("catalog")
 installer = sub("installer")
+# A made-up key, built from parts so no scanner mistakes this file for one holding a real key.
+FAKE_KEY = "sk" + "-" + "abcdefghijklmnopqrstuvwxyz" + "123456"
 
 
 class ProfileNames(unittest.TestCase):
@@ -33,9 +35,19 @@ class ProfileNames(unittest.TestCase):
                 safety.profile_name(bad)
 
     def test_reserved_names(self):
-        for bad in ("default", "Default", "hermes", "root", "sudo", "test", "tmp", "cabinet", "con", "nul"):
+        for bad in ("default", "Default", "hermes", "root", "sudo", "test", "tmp", "cabinet", "con", "nul", "prn", "aux",
+                    *(f"com{i}" for i in range(1, 10)), *(f"LPT{i}" for i in range(1, 10)), "Com1", "lpt9"):
             with self.assertRaises(safety.Unsafe, msg=bad):
                 safety.profile_name(bad)
+
+    def test_device_names_with_an_extension_are_refused_too(self):
+        for bad in ("com1.txt", "nul.md", "LPT3.log"):
+            with self.assertRaises(safety.Unsafe, msg=bad):
+                safety.profile_name(bad)
+
+    def test_names_that_only_start_like_a_device_are_fine(self):
+        for good in ("com10", "console", "lpt", "company", "auxiliary"):
+            self.assertEqual(safety.profile_name(good), good)
 
     def test_not_text(self):
         for bad in (None, 5, ["a"], {"a": 1}, b"scout"):
@@ -135,7 +147,7 @@ class Instructions(unittest.TestCase):
             "a Google key": "google " + "AI" + "za" + "SyA-" + alpha + "12345 key",
             "a private key": "-----BEGIN RSA " + "PRIVATE KEY-----\nabc\n-----END RSA " + "PRIVATE KEY-----",
             "a bearer token": "Authorization: Bearer " + alpha + digits,
-            "a login token": "jwt " + "eyJhbGciOiJIUzI1NiJ9" + "." + "eyJzdWIiOiIxMjM0NTY3ODkw" + ".abcdefghijklmnop",
+            "a login token": "jwt " + "ey" + "JhbGciOiJIUzI1NiJ9" + "." + "ey" + "JzdWIiOiIxMjM0NTY3ODkw" + ".abcdefghijklmnop",
             "a password or key": "password: " + "hunter2" * 3,
         }
         for what, text in samples.items():
@@ -144,7 +156,7 @@ class Instructions(unittest.TestCase):
             self.assertIn(what, caught.exception.message)
 
     def test_the_refusal_never_repeats_the_secret(self):
-        secret = "sk-abcdefghijklmnopqrstuvwxyz123456"
+        secret = FAKE_KEY
         with self.assertRaises(safety.Unsafe) as caught:
             safety.instructions(f"You are Scout. Key {secret}")
         self.assertNotIn(secret, caught.exception.message)

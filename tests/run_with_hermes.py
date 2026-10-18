@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the whole test suite with Hermes importable, safely.
 
-    /usr/bin/python3 tests/run_with_hermes.py
+    python3 tests/run_with_hermes.py        (Windows: py tests\\run_with_hermes.py)
 
 Why this exists: some tests (tests/test_install_hermes.py) call Hermes's own Python functions to create and
 delete real profiles. A scratch HERMES_HOME alone does NOT make that safe if the code comes from the real
@@ -21,14 +21,24 @@ from __future__ import annotations
 
 import hashlib
 import os
-import pwd
 import subprocess
 import sys
 from pathlib import Path
 
-REAL_HOME = Path(pwd.getpwuid(os.getuid()).pw_dir)
+
+def real_home() -> Path:
+    """The person's real home folder: from pwd on macOS and Linux (HOME may point at a sandbox), Path.home() on Windows."""
+    try:
+        import pwd  # not on Windows, so only imported here
+
+        return Path(pwd.getpwuid(os.getuid()).pw_dir)
+    except ImportError:
+        return Path.home()
+
+
+REAL_HOME = real_home()
 REAL_HERMES = REAL_HOME / ".hermes"
-DEFAULT_PY = REAL_HERMES / "hermes-agent" / "venv" / "bin" / "python"
+DEFAULT_PY = REAL_HERMES / "hermes-agent" / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 HERE = Path(__file__).resolve().parent
 
 

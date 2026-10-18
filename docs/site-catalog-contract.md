@@ -5,13 +5,12 @@ you press Refresh, it asks for one file:
 
     https://botcabinet.com/catalog.json
 
-That file does not exist yet (it answers 404 today), so Cabinet shows its saved copy from October 2 and says
-so. Publishing this file is all it takes to make Cabinet current. This page is the contract: what the file
-must be, so that Cabinet accepts it.
+botcabinet.com publishes it. Each time it is regenerated, Cabinet picks up the change the next time it opens.
+This page is the contract: what the file must be, so that Cabinet accepts it.
 
 The file is generated, not hand-written. From this plugin's folder:
 
-    /usr/bin/python3 tools/make_site_catalog.py --out public/catalog.json
+    python3 tools/make_site_catalog.py --out public/catalog.json      (Windows: py tools\make_site_catalog.py ...)
 
 Copy the result into the website repository's `public/` folder (so Next.js serves it at `/catalog.json`).
 `tools/make_site_catalog.py --check <file>` tells you, in plain words, everything Cabinet would refuse in
@@ -29,8 +28,7 @@ data (`tools/make_catalog.py <site-checkout>` takes the snapshot, `make_site_cat
 - It keeps the last good copy in its data folder and uses it when the site can't be reached. A file with a
   `generatedAt` older than the saved copy is refused, so an old file can't replace a new one.
 - It shows "Updated Oct 4 from botcabinet.com" when it used the live file, and "Showing the saved copy from
-  Oct 2" when it didn't. While the file answers 404 it adds a quiet note ("botcabinet.com doesn't publish a live
-  catalog yet"), not an error; any other problem is shown as a warning that says the saved copy was kept.
+  Oct 2" when it didn't. Any problem, a 404 included, is shown as a warning that says the saved copy was kept.
 
 ## Strict means strict
 
@@ -59,8 +57,8 @@ Top level, all required:
 | `siteCommit` | text | up to 80 characters, the site version the file was built from |
 | `origin` | text | exactly `https://botcabinet.com` |
 | `bots` | list | 1 to 300 Bots |
-| `crews` | list | 0 to 100 Crew Kits |
-| `jobs` | list | 0 to 300 job guides |
+| `crews` | list | 1 to 100 Crew Kits |
+| `jobs` | list | 1 to 300 job guides |
 
 A Bot (`bots[]`). Required: `slug`, `name`, `title`, `category`, `summary`, `outcome`.
 
@@ -148,8 +146,8 @@ This file passes the checker. Cabinet's tests run exactly this block.
  ],
  "crews": [
   {
-   "slug": "newsletter-desk",
-   "name": "Newsletter Desk",
+   "slug": "publishing-desk",
+   "name": "Publishing Desk",
    "summary": "Find a topic, draft the issue, and stop for your approval.",
    "members": [
     {"slug": "scout", "name": "Scout", "responsibility": "Find the topic."},
@@ -163,7 +161,7 @@ This file passes the checker. Cabinet's tests run exactly this block.
    "approvalActions": ["Send the issue"],
    "prohibitedActions": ["Publish without approval"],
    "testStatus": "not-tested",
-   "href": "https://botcabinet.com/crew-kits/newsletter-desk/"
+   "href": "https://botcabinet.com/crew-kits/publishing-desk/"
   }
  ],
  "jobs": [
@@ -181,7 +179,8 @@ This file passes the checker. Cabinet's tests run exactly this block.
 
 ## If something goes wrong
 
-- Cabinet says "botcabinet.com hasn't published its catalog file yet": the file isn't at that address.
+- Cabinet says "Cabinet couldn't find botcabinet.com's catalog file": the file isn't at that address (a 404).
+  Check that `public/catalog.json` was deployed.
 - Cabinet says the catalog "didn't pass Cabinet's checks": run `tools/make_site_catalog.py --check` on the
   file you published. It lists every problem.
 - Cabinet keeps showing "the saved copy": it couldn't use the live file. The reason is on the Cabinet page

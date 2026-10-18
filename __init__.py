@@ -17,6 +17,7 @@ from __future__ import annotations
 import logging
 
 PLUGIN_ID = "bot-cabinet-v2"
+__version__ = "0.3.11"  # also plugin.yaml, dashboard/manifest.json, sync.USER_AGENT (tests/test_api.py checks they agree)
 TOOLS: tuple[str, ...] = ()
 HOOKS: tuple[str, ...] = ()
 

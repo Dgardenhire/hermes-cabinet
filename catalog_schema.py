@@ -272,8 +272,9 @@ def validate_catalog(doc: Any) -> dict[str, Any]:
     if doc["origin"] != ORIGIN:
         c.bad("origin", f"must be exactly {ORIGIN}")
     for key, limit in (("bots", MAX_BOTS), ("crews", MAX_CREWS), ("jobs", MAX_JOBS)):
-        if not isinstance(doc[key], list) or len(doc[key]) > limit or (key == "bots" and not doc[key]):
-            c.bad(key, f"must be a list of {'1' if key == 'bots' else '0'} to {limit}")
+        # At least one of each: the Fit Test and the crew screens are built on them.
+        if not isinstance(doc[key], list) or not 1 <= len(doc[key]) <= limit:
+            c.bad(key, f"must be a list of 1 to {limit}")
             doc = {**doc, key: []}
     bots = [_bot(c, b, i) for i, b in enumerate(doc["bots"])]
     slugs = {b["slug"] for b in bots if b}

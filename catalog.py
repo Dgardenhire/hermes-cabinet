@@ -88,6 +88,8 @@ def _score(query: set[str], *texts: str) -> int:
 def best_job(text: str) -> tuple[dict[str, Any] | None, int]:
     q = words(text)
     scored = [(_score(q, j["title"], j["title"], j["outcome"]), i, j) for i, j in enumerate(jobs())]
+    if not scored:
+        return None, 0
     score, _, job = max(scored, key=lambda s: (s[0], -s[1]))
     return (job, score) if score else (None, 0)
 
@@ -101,6 +103,8 @@ def best_bot(text: str) -> tuple[dict[str, Any] | None, int]:
         if job and b["slug"] in job["botSlugs"]:
             s += job_score  # a guide that names this Bot as its lead counts toward it
         scored.append((s, i, b))
+    if not scored:
+        return None, 0
     score, _, found = max(scored, key=lambda s: (s[0], -s[1]))
     return (found, score) if score else (None, 0)
 
@@ -112,6 +116,8 @@ def best_member(text: str, crew_: dict[str, Any]) -> dict[str, Any] | None:
     for i, m in enumerate(crew_["members"]):
         b = bot(m["slug"]) or {}
         scored.append((_score(q, m["responsibility"], b.get("title", ""), b.get("summary", "")), -i, m["slug"]))
+    if not scored:
+        return None
     score, _, slug = max(scored)
     return bot(slug) if score else bot(crew_["members"][0]["slug"])
 
@@ -126,18 +132,22 @@ def best_crew(text: str) -> tuple[dict[str, Any] | None, int]:
         if job and set(job["botSlugs"]) <= {m["slug"] for m in c["members"]}:
             s += job_score
         scored.append((s, own, i, c))
+    if not scored:
+        return None, 0
     # A tie goes to the crew whose own name and summary match the job more closely, then to catalog order.
     score, _, _, found = max(scored, key=lambda s: (s[0], s[1], -s[2]))
     return (found, score) if score else (None, 0)
 
 
 def common_jobs(limit: int = 6) -> list[dict[str, Any]]:
-    """Job guides for the quick-start list, each with the Bot that leads it."""
+    """Job guides for the quick-start list, each with the Bot that leads it. One the live catalog dropped is left out."""
     picks = ("personal-morning-newspaper", "weekly-newsletter", "client-proposal", "grant-opportunity-review",
              "project-launch-plan", "software-feature-build")
     out = []
     for slug in picks[:limit]:
-        job = next(j for j in jobs() if j["slug"] == slug)
+        job = next((j for j in jobs() if j["slug"] == slug), None)
+        if job is None:
+            continue
         lead = bot(job["botSlugs"][0]) if job["botSlugs"] else None
         out.append({"slug": job["slug"], "title": job["title"], "outcome": job["outcome"],
                     "lead": lead["name"] if lead else "",

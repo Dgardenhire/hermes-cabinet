@@ -27,8 +27,11 @@ from pathlib import Path
 from typing import Any
 
 PROFILE_ID = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
-# Hermes's reserved names (hermes_cli.profiles._RESERVED_NAMES), plus names that would shadow a system command.
-RESERVED = frozenset({"hermes", "default", "test", "tmp", "root", "sudo", "cabinet", "con", "nul", "prn", "aux"})
+# Hermes's reserved names (hermes_cli.profiles._RESERVED_NAMES), plus names that would shadow a system command, plus
+# the device names Windows won't allow as a folder name (com1-com9 and lpt1-lpt9 too, in any case, with or without an
+# extension).
+RESERVED = frozenset({"hermes", "default", "test", "tmp", "root", "sudo", "cabinet", "con", "nul", "prn", "aux",
+                      *(f"com{i}" for i in range(1, 10)), *(f"lpt{i}" for i in range(1, 10))})
 
 MAX_NAME = 60
 MAX_DESCRIPTION = 200
@@ -103,7 +106,7 @@ def profile_name(raw: Any, field: str = "profile") -> str:
     canon = text.lower()
     if not PROFILE_ID.match(canon):
         raise Unsafe(field, f"Use lowercase letters, numbers, '-' or '_', up to 64 characters. For example: {suggest_profile_name(text)}")
-    if canon in RESERVED:
+    if canon in RESERVED or canon.split(".", 1)[0] in RESERVED:
         raise Unsafe(field, f"'{canon}' is a name Hermes keeps for itself. Pick a different name.")
     return canon
 

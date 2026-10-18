@@ -5,7 +5,7 @@ Tables:
 - ``plans``: a review screen's plan, kept until it is done or goes stale, so a profile that was created
   but never recorded (the app closed in between) can be recognised and recorded later.
 - ``installs``: every Hermes profile Cabinet created, with a fingerprint of what it looked like the moment
-  it was made. Removing is only offered while the profile still matches that fingerprint.
+  it was made (every file, by size and hash). Removing is only offered while the profile still matches it.
 - ``crews``: every crew Cabinet set up: which bots, in what order, which profiles are Cabinet's and
   which were already the owner's, and any Kanban cards it made.
 - ``kits``: Bot Lab plans saved to reuse. A kit is a saved plan, not a profile.

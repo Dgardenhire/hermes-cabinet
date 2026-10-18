@@ -19,7 +19,7 @@ led there, and then helps you act on it: add one of botcabinet.com's Bots as a H
 up a crew of Bots that hand work to each other. Anything Cabinet makes can be removed again from My Bots, as long
 as you haven't changed it.
 
-Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.10, MIT licensed.
+Cabinet is the Hermes Desktop edition of [Bot Cabinet](https://botcabinet.com). Version 0.3.11, MIT licensed.
 
 ![Cabinet: find the smallest setup for a job, then add Bots and crews from botcabinet.com, with undo](docs/card.png)
 
@@ -98,11 +98,16 @@ switched itself on, loaded cleanly, and its desktop page and dashboard routes an
    gives the new bot your current model and sign-in. Cabinet passes no model and never handles a credential. The page
    waits up to two minutes, because Hermes sets up a new profile in a separate process.
 3. **Record.** Cabinet checks what Hermes made (it exists, is new since the plan, carries the planned instructions,
-   and Hermes's own Bots catalog didn't add it) and records it with a fingerprint. If the reply from Hermes was lost,
+   and Hermes's own Bots catalog didn't add it) and records a fingerprint: every file in the profile, by size and
+   hash (the keys file by size and time only, never its contents). If the reply from Hermes was lost,
    Cabinet records the profile only when its instructions are exactly the planned ones, and changes nothing in it. If
    Hermes says the name already exists, Cabinet records nothing.
 
-Remove works only while the profile still matches that fingerprint, and goes through Hermes's own delete. A crew
+Remove works only while every file still matches that fingerprint, and goes through Hermes's own delete. A file
+added, removed or changed anywhere in the profile keeps it, hidden files included. Only what Hermes writes by itself
+as a bot runs doesn't count: caches, locks, logs, snapshots, backups, running state and downloaded tools and models
+(the full list is in SECURITY.md). A chat in `state.db` or a project in `projects.db` does count. A bot recorded by
+Cabinet 0.3.10 or older has no file list, so Cabinet keeps it and says why. A crew
 member's instructions name its own step, who it gets work from and who it hands to next, from the crew's handoff
 order. Hermes does not run a crew by itself, and Cabinet says so on the crew screen. Once a crew is set up, Cabinet
 suggests a Hermes group chat with its bots for talking the job through; the crew's order stays with the Kanban cards.
@@ -135,7 +140,7 @@ check each line.
   itself. No analytics, no telemetry, no account.
 - **Creates and removes Hermes profiles.** Add and crew setup create profiles through Hermes's own gateway call
   `profiles.create` (the call New Agent uses). Remove deletes a profile through Hermes's own `delete_profile`, and only
-  a profile Cabinet made that still matches the fingerprint Cabinet recorded. A profile you changed, or one Hermes's
+  a profile Cabinet made whose files all still match the list Cabinet recorded. A profile you changed, or one Hermes's
   Bots catalog added, is never edited or removed.
 - **Kanban cards.** Setting up a crew can add blocked cards to your Hermes Kanban board (optional, one per step), and
   removing the crew archives them.
@@ -164,7 +169,7 @@ Verified by 449 tests (all pass with Hermes importable; the 3 that compare again
 
 - Cabinet's request goes through Hermes's real `profiles.create` handler, and Hermes's own SOUL.md loader loads exactly
   the planned instructions, with nothing flagged by its injection scanner. Run for every Bot and every crew with
-  `CABINET_E2E_ALL=1 /usr/bin/python3 tests/run_with_hermes.py -k e2e`.
+  `CABINET_E2E_ALL=1 python3 tests/run_with_hermes.py -k e2e`.
 - Crews: right members, handoff-aware instructions, Kanban cards blocked, chained and assigned to the right bot.
 - Cabinet never overwrites, edits or deletes a profile it didn't make, or one you changed.
 - The test runner fails if the real `~/.hermes` changes.
@@ -178,10 +183,12 @@ was called.
 
 ## Develop
 
-    cd tests && /usr/bin/python3 -m unittest discover -p "test_*.py"
-    /usr/bin/python3 tests/run_with_hermes.py        # also the tests that call Hermes (separate clone, temporary home)
-    /usr/bin/python3 harness/serve.py 8893           # then open http://127.0.0.1:8893/harness/
-    /usr/bin/python3 harness/shoot.py                # screenshots of every screen into harness/shots/
+    cd tests && python3 -m unittest discover -p "test_*.py"
+    python3 tests/run_with_hermes.py        # also the tests that call Hermes (separate clone, temporary home)
+    python3 harness/serve.py 8893           # then open http://127.0.0.1:8893/harness/
+    python3 harness/shoot.py                # screenshots of every screen into harness/shots/ (needs Google Chrome)
+
+`python3` works on macOS and Linux. On Windows, use `py` instead (`py tests\run_with_hermes.py`).
 
 `tests/run_with_hermes.py` uses a separate clone of Hermes, named by `CABINET_HERMES_SRC=/path/to/hermes-agent-clone`,
 and never the installed copy. Without it, the tests that need Hermes are skipped.

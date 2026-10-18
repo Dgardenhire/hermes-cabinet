@@ -22,6 +22,8 @@ hermes = sub("hermes_bridge")
 installer = sub("installer")
 sync = sub("sync")
 schema = sub("catalog_schema")
+# A made-up key, built from parts so no scanner mistakes this file for one holding a real key.
+FAKE_KEY = "sk" + "-" + "abcdefghijklmnopqrstuvwxyz" + "123456"
 
 
 class Base(unittest.TestCase):
@@ -71,10 +73,11 @@ class CatalogView(Base):
         self.assertEqual(out["bots"][0]["summary"], "Fresh from the site.")
 
     def test_refresh_when_the_site_has_no_file_yet(self):
-        with mock.patch.object(sync, "fetch", side_effect=sync.SyncError("botcabinet.com hasn't published its catalog file yet")):
+        with mock.patch.object(sync, "fetch", side_effect=sync.SyncError(sync.NOT_FOUND)):
             out = api.catalog_refresh()
         self.assertEqual(out["status"]["source"], "bundled")
-        self.assertIn("hasn't published", out["status"]["error"])
+        self.assertIn("couldn't find", out["status"]["error"])
+        self.assertEqual(out["status"]["tone"], "warn")
 
     def test_a_live_bot_the_snapshot_never_had_can_be_added(self):
         live = json.loads(json.dumps(catalog.bundled()))
@@ -227,9 +230,9 @@ class LabPlanIsNowTheSamePath(Base):
             self.assertIsNone(out["create"])
 
     def test_a_secret_in_a_field_blocks_creation(self):
-        out = self.plan(botName="Lookout", toolsIntegrations="use sk-abcdefghijklmnopqrstuvwxyz123456 for the API")
+        out = self.plan(botName="Lookout", toolsIntegrations="use " + FAKE_KEY + " for the API")
         self.assertFalse(out["ready"])
-        self.assertNotIn("sk-abcdefghijklmnopqrstuvwxyz123456", json.dumps(out["problems"]))
+        self.assertNotIn(FAKE_KEY, json.dumps(out["problems"]))
 
     def test_the_plan_is_too_big(self):
         with self.assertRaises(api.ApiError) as caught:

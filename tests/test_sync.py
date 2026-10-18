@@ -147,9 +147,9 @@ class Fetch(Base):
         self.assertEqual(calls, [(sync.URL, sync.TIMEOUT)])
         self.assertLessEqual(sync.TIMEOUT, 5)
 
-    def test_not_found_says_it_isnt_published(self):
+    def test_not_found_says_the_file_is_missing(self):
         err = urllib.error.HTTPError(sync.URL, 404, "Not Found", {}, None)
-        with self.assertRaisesRegex(sync.SyncError, "hasn't published"):
+        with self.assertRaisesRegex(sync.SyncError, "couldn't find botcabinet.com's catalog file"):
             sync.fetch(opener(raises=err))
 
     def test_a_server_error(self):
@@ -247,16 +247,16 @@ class Refresh(Base):
         self.assertIn("couldn't reach", out["error"])
         self.assertEqual(catalog.bots()[0]["summary"], catalog.bundled()["bots"][0]["summary"])
 
-    def test_the_404_today_is_a_calm_fallback(self):
+    def test_a_404_is_a_warning_now_that_the_catalog_is_published(self):
+        # botcabinet.com publishes catalog.json, so a missing file is a fault, shown like any other.
         err = urllib.error.HTTPError(sync.URL, 404, "Not Found", {}, None)
         out = sync.refresh(self.data, opener(raises=err), NOW)
         self.assertEqual(out["source"], "bundled")
-        self.assertIn("hasn't published", out["error"])
+        self.assertIn("couldn't find", out["error"])
         self.assertEqual(out["label"], "Showing the saved copy from Oct 15")
-        # Not an error on screen: the expected state today is a calm note.
-        self.assertEqual(out["tone"], "calm")
-        self.assertEqual(out["note"], sync.CALM_NOTE)
-        self.assertNotIn("error", out["note"].lower())
+        self.assertEqual(out["tone"], "warn")
+        self.assertIn("Cabinet kept the copy it had", out["note"])
+        self.assertFalse(hasattr(sync, "CALM_NOTE"))
 
     def test_a_real_problem_is_a_warning_that_says_the_copy_was_kept(self):
         out = sync.refresh(self.data, opener(raises=urllib.error.URLError("offline")), NOW)
@@ -315,6 +315,32 @@ class Refresh(Base):
         out = sync.activate_best(self.data)
         self.assertEqual(out["source"], "cache")
         self.assertEqual(catalog.bots()[0]["summary"], "Changed on the live site.")
+
+    def test_startup_prefers_the_bundle_when_it_is_newer_than_the_saved_copy(self):
+        # A plugin update ships a fresher snapshot than an old saved copy: the fresher one wins.
+        old = newer(date="2026-01-01")
+        sync.write_cache(schema.validate_catalog(old), "2026-01-01T00:00:00Z", self.data)
+        out = sync.activate_best(self.data)
+        self.assertEqual(out["source"], "bundled")
+        self.assertEqual(out["updatedAt"], catalog.bundled()["generatedAt"])
+
+    def test_a_failed_refresh_falls_back_to_the_newer_of_the_saved_copy_and_the_bundle(self):
+        sync.write_cache(schema.validate_catalog(newer(date="2026-01-01")), "2026-01-01T00:00:00Z", self.data)
+        out = sync.refresh(self.data, opener(raises=urllib.error.URLError("x")), NOW)
+        self.assertEqual(out["source"], "bundled")
+        self.assertEqual(catalog.load(), catalog.bundled())
+
+    def test_saving_the_copy_never_follows_a_planted_link(self):
+        import os
+        outside = self.data / "outside.txt"
+        outside.write_text("leave me alone")
+        try:
+            os.symlink(outside, self.data / f"{sync.CACHE_NAME}.tmp{os.getpid()}")
+        except (OSError, NotImplementedError):
+            self.skipTest("this system can't make links")
+        sync.write_cache(catalog.bundled(), "2026-10-17T00:00:00Z", self.data)
+        self.assertEqual(outside.read_text(), "leave me alone")
+        self.assertIsNotNone(sync.read_cache(self.data))
 
     def test_a_corrupt_saved_copy_is_ignored(self):
         (self.data / sync.CACHE_NAME).write_text("{ broken", encoding="utf-8")

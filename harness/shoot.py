@@ -7,7 +7,7 @@ data-ready="1" once the scene is seeded and every click has run), using the inst
 Without it, plain headless Chrome is used with a time budget, which can catch a page before it renders
 when a scene takes long to seed; those frames are retried and reported as blank.
 
-    /usr/bin/python3 harness/shoot.py [names...]        (default: every screen, into harness/shots/)
+    python3 harness/shoot.py [names...]        (default: every screen, into harness/shots/)
 """
 import argparse
 import shutil
